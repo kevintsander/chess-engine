@@ -1,30 +1,34 @@
 # frozen_string_literal: true
 
-require './lib/chess-engine/unit'
+require_relative '../unit'
 
 # Represents a King chess piece
-class King < Unit
-  def allowed_actions_deltas
-    @allowed_actions_deltas ||= { normal_move: king_deltas,
-                                  normal_attack: king_deltas,
-                                  kingside_castle: kingside_castle_delta,
-                                  queenside_castle: queenside_castle_delta }
-    @allowed_actions_deltas
-  end
+module ChessEngine
+  module Units
+    class King < Unit
+      def allowed_actions_deltas
+        @allowed_actions_deltas ||= { normal_move: king_deltas,
+                                      normal_attack: king_deltas,
+                                      kingside_castle: kingside_castle_delta,
+                                      queenside_castle: queenside_castle_delta }
+        @allowed_actions_deltas
+      end
 
-  private
+      private
 
-  def king_deltas
-    straight = [[0, 1], [0, -1], [1, 0], [-1, 0]]
-    diagonal = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
-    straight + diagonal
-  end
+      def king_deltas
+        straight = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        diagonal = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+        straight + diagonal
+      end
 
-  def kingside_castle_delta
-    [[0, 2]]
-  end
+      def kingside_castle_delta
+        [[0, 2]]
+      end
 
-  def queenside_castle_delta
-    [[0, -2]]
+      def queenside_castle_delta
+        [[0, -2]]
+      end
+    end
   end
 end

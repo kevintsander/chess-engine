@@ -1,119 +1,121 @@
 # frozen_string_literal: true
 
-require './lib/chess-engine/board'
-require './lib/chess-engine/helpers/game/game_logger'
-require './lib/chess-engine/helpers/game/game_action_checker'
-require './lib/chess-engine/helpers/game/game_status_checker'
-require './lib/chess-engine/helpers/game/game_file_handler'
-require './lib/chess-engine/errors/game_errors'
-require './lib/chess-engine/actions/promote_command'
+require_relative './board'
+require_relative './helpers/game/game_logger'
+require_relative './helpers/game/game_action_checker'
+require_relative './helpers/game/game_status_checker'
+require_relative './helpers/game/game_file_handler'
+require_relative './errors/game_errors'
+require_relative './actions/promote_command'
 
 # Represents a Chess game
-class Game
-  include GameErrors
-  include GameLogger
-  include GameActionChecker
-  include GameStatusChecker
-  include GameFileHandler
+module ChessEngine
+  class Game
+    include Errors::GameErrors
+    include Helpers::Game::GameLogger
+    include Helpers::Game::GameActionChecker
+    include Helpers::Game::GameStatusChecker
+    include Helpers::Game::GameFileHandler
 
-  attr_reader :board, :game_log, :players, :turn, :current_player, :player_draw
+    attr_reader :board, :game_log, :players, :turn, :current_player, :player_draw
 
-  @current_player = nil
-  @turn = 0
-  @player_draw = false
-  @pgn_fast_forward = false
+    @current_player = nil
+    @turn = 0
+    @player_draw = false
+    @pgn_fast_forward = false
 
-  def initialize(players = [])
-    @players = players
-    @game_log = []
-    @board = Board.new(game_log)
-    @allowed_actions_cache = {}
-  end
-
-  def add_players(players)
-    @players = players
-  end
-
-  def start
-    setup_new_board
-    @turn = 1
-    @current_player = @players.detect { |player| player.color == :white }
-  end
-
-  def game_over?
-    turn&.positive? && (player_draw || fifty_turn_draw? || any_stalemate? || any_checkmate?)
-  end
-
-  def submit_draw
-    @player_draw = true
-  end
-
-  def both_players_played?
-    turn_logs = game_log.select { |log_item| log_item[:turn] == turn }
-    player1_played = turn_logs&.select { |log_item| log_item[:action].unit.player == players[0] }&.any?
-    player2_played = turn_logs&.select { |log_item| log_item[:action].unit.player == players[1] }&.any?
-    player1_played && player2_played
-  end
-
-  def turn_over?
-    both_players_played? && !can_promote_unit?(last_unit)
-  end
-
-  def perform_promote(unit, promoted_unit_class)
-    promote_command = PromoteCommand.new(board, unit, unit.location, promoted_unit_class)
-    perform_action(promote_command)
-  end
-
-  def perform_action(action)
-    raise GameNotStartedError if turn.zero?
-    raise GameAlreadyOverError if game_over?
-
-    unit = action.unit
-    raise ArgumentError, 'Only current player can perform action' if unit.player != current_player
-
-    is_promote_command = action.is_a?(PromoteCommand)
-    raise MustPromoteError if last_unit && can_promote_unit?(last_unit) && !is_promote_command
-
-    unless is_promote_command || allowed_actions(unit).include?(action)
-      raise ArgumentError,
-            "unit #{unit.symbol} cannot perform #{action.class.name} at #{action.location}"
+    def initialize(players = [])
+      @players = players
+      @game_log = []
+      @board = Board.new(game_log)
+      @allowed_actions_cache = {}
     end
 
-    action.perform_action
-    @allowed_actions_cache = {} # reset allowed actions cache
-    log_action(action)
-    return if game_over?
-
-    switch_current_player unless can_promote_unit?(unit)
-    @turn += 1 if turn_over?
-  end
-
-  def new_game_units
-    units = []
-    players.each do |player|
-      non_pawn_rank = player.color == :white ? '1' : '8'
-      pawn_rank = player.color == :white ? '2' : '7'
-      units << King.new("e#{non_pawn_rank}", player)
-      units << Queen.new("d#{non_pawn_rank}", player)
-      units += %w[c f].map { |file| Bishop.new("#{file}#{non_pawn_rank}", player) }
-      units += %w[b g].map { |file| Knight.new("#{file}#{non_pawn_rank}", player) }
-      units += %w[a h].map { |file| Rook.new("#{file}#{non_pawn_rank}", player) }
-      units += %w[a b c d e f g h].map { |file| Pawn.new("#{file}#{pawn_rank}", player) }
+    def add_players(players)
+      @players = players
     end
-    units
-  end
 
-  def setup_new_board
-    @board.clear_units.add_unit(*new_game_units)
-  end
+    def start
+      setup_new_board
+      @turn = 1
+      @current_player = @players.detect { |player| player.color == :white }
+    end
 
-  def other_player(player)
-    (players - [player]).first
-  end
+    def game_over?
+      turn&.positive? && (player_draw || fifty_turn_draw? || any_stalemate? || any_checkmate?)
+    end
 
-  private
+    def submit_draw
+      @player_draw = true
+    end
 
-  def switch_current_player
-    @current_player = other_player(current_player)
+    def both_players_played?
+      turn_logs = game_log.select { |log_item| log_item[:turn] == turn }
+      player1_played = turn_logs&.select { |log_item| log_item[:action].unit.player == players[0] }&.any?
+      player2_played = turn_logs&.select { |log_item| log_item[:action].unit.player == players[1] }&.any?
+      player1_played && player2_played
+    end
+
+    def turn_over?
+      both_players_played? && !can_promote_unit?(last_unit)
+    end
+
+    def perform_promote(unit, promoted_unit_class)
+      promote_command = PromoteCommand.new(board, unit, unit.location, promoted_unit_class)
+      perform_action(promote_command)
+    end
+
+    def perform_action(action)
+      raise GameNotStartedError if turn.zero?
+      raise GameAlreadyOverError if game_over?
+
+      unit = action.unit
+      raise ArgumentError, 'Only current player can perform action' if unit.player != current_player
+
+      is_promote_command = action.is_a?(PromoteCommand)
+      raise MustPromoteError if last_unit && can_promote_unit?(last_unit) && !is_promote_command
+
+      unless is_promote_command || allowed_actions(unit).include?(action)
+        raise ArgumentError,
+              "unit #{unit.symbol} cannot perform #{action.class.name} at #{action.location}"
+      end
+
+      action.perform_action
+      @allowed_actions_cache = {} # reset allowed actions cache
+      log_action(action)
+      return if game_over?
+
+      switch_current_player unless can_promote_unit?(unit)
+      @turn += 1 if turn_over?
+    end
+
+    def new_game_units
+      units = []
+      players.each do |player|
+        non_pawn_rank = player.color == :white ? '1' : '8'
+        pawn_rank = player.color == :white ? '2' : '7'
+        units << Units::King.new("e#{non_pawn_rank}", player)
+        units << Units::Queen.new("d#{non_pawn_rank}", player)
+        units += %w[c f].map { |file| Units::Bishop.new("#{file}#{non_pawn_rank}", player) }
+        units += %w[b g].map { |file| Units::Knight.new("#{file}#{non_pawn_rank}", player) }
+        units += %w[a h].map { |file| Units::Rook.new("#{file}#{non_pawn_rank}", player) }
+        units += %w[a b c d e f g h].map { |file| Units::Pawn.new("#{file}#{pawn_rank}", player) }
+      end
+      units
+    end
+
+    def setup_new_board
+      @board.clear_units.add_unit(*new_game_units)
+    end
+
+    def other_player(player)
+      (players - [player]).first
+    end
+
+    private
+
+    def switch_current_player
+      @current_player = other_player(current_player)
+    end
   end
 end

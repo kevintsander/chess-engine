@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/chess-engine/units/king'
+require_relative './lib/chess-engine/units/king'
 
 describe King do
   describe '#initialize' do

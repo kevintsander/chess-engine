@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/chess-engine/actions/promote_command'
+require_relative './lib/chess-engine/actions/promote_command'
 
 describe PromoteCommand do
   let(:board) { double('board') }

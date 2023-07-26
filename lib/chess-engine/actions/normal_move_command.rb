@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
-require './lib/chess-engine/action_command'
+require_relative '../action_command'
 
-# represents a normal move
-class NormalMoveCommand < ActionCommand
-  DISPLAY_NAME = 'Normal move'
+module ChessEngine
+  module Actions
+    # represents a normal move
+    class NormalMoveCommand < ActionCommand
+      DISPLAY_NAME = 'Normal move'
 
-  def perform_moves
-    unit.move(location)
-    # game_log.log_action(turn, :move, unit, location, last_location)
+      def perform_moves
+        unit.move(location)
+        # game_log.log_action(turn, :move, unit, location, last_location)
+      end
+    end
   end
 end

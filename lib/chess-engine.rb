@@ -1,2 +1,2 @@
-require './chess-engine/game'
-require './chess-engine/player'
+require_relative './chess-engine/game'
+require_relative './chess-engine/player'

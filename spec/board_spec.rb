@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/chess-engine/board'
+require_relative './lib/chess-engine/board'
 
 describe Board do
   let(:white_player) { double('white_player', color: :white) }

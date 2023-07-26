@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/chess-engine/units/queen'
+require_relative './lib/chess-engine/units/queen'
 
 describe Queen do
   describe '#initialize' do
