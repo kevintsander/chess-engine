@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/game'
+require './lib/chess-engine/game'
 
 describe Game do
   let(:white_player) { double('white_player', color: :white) }
@@ -471,8 +471,8 @@ describe Game do
 
     context 'action is not currently allowed for the unit' do
       let(:unit) { double('unit', player: white_player, location: 'b6', symbol: '♘') }
-      let(:action) { double('action', unit: unit, location: 'h3') }
-      let(:other_action) { double('action', unit: unit) }
+      let(:action) { double('action', unit:, location: 'h3') }
+      let(:other_action) { double('action', unit:) }
 
       before do
         allow(game_perform).to receive(:turn).and_return(10)
@@ -489,7 +489,7 @@ describe Game do
 
     context 'action is allowed for the unit' do
       let(:unit) { double('unit', player: white_player, location: 'b6', symbol: '♘') }
-      let(:action) { double('action', unit: unit, location: 'h3') }
+      let(:action) { double('action', unit:, location: 'h3') }
 
       before do
         game_perform.instance_variable_set(:@turn, 10)
@@ -513,7 +513,7 @@ describe Game do
           allow(game_perform).to receive(:last_unit).and_return(other_unit)
           allow(game_perform).to receive(:can_promote_unit?).with(other_unit).and_return(false)
           allow(game_perform).to receive(:can_promote_unit?).with(unit).and_return(true)
-          expect { game_perform.perform_action(action) }.not_to change { game_perform.current_player }
+          expect { game_perform.perform_action(action) }.not_to(change { game_perform.current_player })
         end
       end
 

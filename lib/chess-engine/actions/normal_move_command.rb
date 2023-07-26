@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/action_command'
+require './lib/chess-engine/action_command'
 
 # represents a normal move
 class NormalMoveCommand < ActionCommand

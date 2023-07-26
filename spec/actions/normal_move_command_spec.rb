@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/actions/normal_move_command'
+require './lib/chess-engine/actions/normal_move_command'
 
 describe NormalMoveCommand do
   let(:board) { double('board') }

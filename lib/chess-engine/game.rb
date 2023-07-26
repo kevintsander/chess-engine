@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require './lib/board'
-require './lib/helpers/game/game_logger'
-require './lib/helpers/game/game_action_checker'
-require './lib/helpers/game/game_status_checker'
-require './lib/helpers/game/game_file_handler'
-require './lib/errors/game_errors'
-require './lib/actions/promote_command'
+require './lib/chess-engine/board'
+require './lib/chess-engine/helpers/game/game_logger'
+require './lib/chess-engine/helpers/game/game_action_checker'
+require './lib/chess-engine/helpers/game/game_status_checker'
+require './lib/chess-engine/helpers/game/game_file_handler'
+require './lib/chess-engine/errors/game_errors'
+require './lib/chess-engine/actions/promote_command'
 
 # Represents a Chess game
 class Game

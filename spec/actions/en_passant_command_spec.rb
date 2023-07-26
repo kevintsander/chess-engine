@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/actions/en_passant_command'
+require './lib/chess-engine/actions/en_passant_command'
 
 describe EnPassantCommand do
   let(:board) { double('board') }

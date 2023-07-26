@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/actions/attack_move_command'
+require './lib/chess-engine/actions/attack_move_command'
 
 describe AttackMoveCommand do
   let(:board) { double('board') }

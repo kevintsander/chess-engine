@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/action_command'
+require './lib/chess-engine/action_command'
 
 # represents an attack move that will capture another unit
 class AttackMoveCommand < ActionCommand

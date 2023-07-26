@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/actions/queenside_castle_command'
+require './lib/chess-engine/actions/queenside_castle_command'
 
 describe QueensideCastleCommand do
   let(:board) { double('board') }

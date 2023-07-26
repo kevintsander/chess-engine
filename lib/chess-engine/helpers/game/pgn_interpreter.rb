@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require './lib/units/pawn'
-require './lib/units/king'
-require './lib/units/queen'
-require './lib/units/rook'
-require './lib/units/bishop'
-require './lib/units/knight'
+require './lib/chess-engine/units/pawn'
+require './lib/chess-engine/units/king'
+require './lib/chess-engine/units/queen'
+require './lib/chess-engine/units/rook'
+require './lib/chess-engine/units/bishop'
+require './lib/chess-engine/units/knight'
 
 # This class interprets chess PGN files
 class PgnInterpreter

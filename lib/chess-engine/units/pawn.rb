@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/unit'
+require './lib/chess-engine/unit'
 
 # Represents a King chess piece
 class Pawn < Unit

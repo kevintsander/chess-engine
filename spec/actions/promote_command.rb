@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require './lib/actions/promote_command'
+require './lib/chess-engine/actions/promote_command'
 
 describe PromoteCommand do
   let(:board) { double('board') }
   let(:player) { double('player') }
-  let(:unit) { double('unit', location: 'g8', player: player) }
+  let(:unit) { double('unit', location: 'g8', player:) }
   subject(:promote) { described_class.new(board, unit, 'g8', Queen) }
 
   before do

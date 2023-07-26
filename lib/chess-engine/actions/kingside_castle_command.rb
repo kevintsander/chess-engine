@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/action_command'
+require './lib/chess-engine/action_command'
 
 # represents a kingside castle command
 class KingsideCastleCommand < ActionCommand

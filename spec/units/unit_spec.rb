@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/unit'
+require './lib/chess-engine/unit'
 
 describe Unit do
   let(:white_player) { double('white_player', color: :white) }

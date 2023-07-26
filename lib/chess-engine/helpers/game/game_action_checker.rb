@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require './lib/actions/normal_move_command'
-require './lib/actions/attack_move_command'
-require './lib/actions/en_passant_command'
-require './lib/actions/kingside_castle_command'
-require './lib/actions/queenside_castle_command'
+require './lib/chess-engine/actions/normal_move_command'
+require './lib/chess-engine/actions/attack_move_command'
+require './lib/chess-engine/actions/en_passant_command'
+require './lib/chess-engine/actions/kingside_castle_command'
+require './lib/chess-engine/actions/queenside_castle_command'
 
 module GameActionChecker
   attr_writer :test_game

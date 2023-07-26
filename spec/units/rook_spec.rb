@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/units/rook'
+require './lib/chess-engine/units/rook'
 
 describe Rook do
   describe '#initialize' do

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/units/pawn'
+require './lib/chess-engine/units/pawn'
 
 describe Pawn do
   context 'black pawn' do

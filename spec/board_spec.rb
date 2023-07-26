@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/board'
+require './lib/chess-engine/board'
 
 describe Board do
   let(:white_player) { double('white_player', color: :white) }
@@ -106,8 +106,8 @@ describe Board do
 
     context 'unit(s) of specified color and type are located at file' do
       let(:player) { double('player', color: :black) }
-      let(:file_unit1) { double('unit', location: 'c8', off_board?: false, player: player) }
-      let(:file_unit2) { double('unit', location: 'c2', off_board?: false, player: player) }
+      let(:file_unit1) { double('unit', location: 'c8', off_board?: false, player:) }
+      let(:file_unit2) { double('unit', location: 'c2', off_board?: false, player:) }
 
       before do
         allow(file_unit1).to receive(:instance_of?).and_return(true)
@@ -123,8 +123,8 @@ describe Board do
 
     context 'no unit at file' do
       let(:player) { double('player', color: :black) }
-      let(:file_unit1) { double('unit', location: 'c8', off_board?: false, player: player) }
-      let(:file_unit2) { double('unit', location: 'c2', off_board?: false, player: player) }
+      let(:file_unit1) { double('unit', location: 'c8', off_board?: false, player:) }
+      let(:file_unit2) { double('unit', location: 'c2', off_board?: false, player:) }
 
       before do
         allow(file_board).to receive(:units).and_return([file_unit1, file_unit2])
@@ -138,8 +138,8 @@ describe Board do
 
     context 'unit of same color but different type on file' do
       let(:player) { double('player', color: :white) }
-      let(:file_unit1) { double('unit', location: 'h8', off_board?: false, player: player) }
-      let(:file_unit2) { double('unit', location: 'h3', off_board?: false, player: player) }
+      let(:file_unit1) { double('unit', location: 'h8', off_board?: false, player:) }
+      let(:file_unit2) { double('unit', location: 'h3', off_board?: false, player:) }
 
       before do
         allow(file_unit1).to receive(:instance_of?).and_return(false)
@@ -174,8 +174,8 @@ describe Board do
 
     context 'unit(s) of specified color and type are loated at rank' do
       let(:player) { double('player', color: :black) }
-      let(:rank_unit1) { double('unit', location: 'e2', off_board?: false, player: player) }
-      let(:rank_unit2) { double('unit', location: 'c2', off_board?: false, player: player) }
+      let(:rank_unit1) { double('unit', location: 'e2', off_board?: false, player:) }
+      let(:rank_unit2) { double('unit', location: 'c2', off_board?: false, player:) }
 
       before do
         allow(rank_unit1).to receive(:instance_of?).and_return(true)
@@ -191,8 +191,8 @@ describe Board do
 
     context 'no unit at rank' do
       let(:player) { double('player', color: :black) }
-      let(:rank_unit1) { double('unit', location: 'e2', off_board?: false, player: player) }
-      let(:rank_unit2) { double('unit', location: 'c2', off_board?: false, player: player) }
+      let(:rank_unit1) { double('unit', location: 'e2', off_board?: false, player:) }
+      let(:rank_unit2) { double('unit', location: 'c2', off_board?: false, player:) }
 
       before do
         allow(rank_board).to receive(:units).and_return([rank_unit1, rank_unit2])
@@ -206,8 +206,8 @@ describe Board do
 
     context 'unit of same color but different type on rank' do
       let(:player) { double('player', color: :white) }
-      let(:rank_unit1) { double('unit', location: 'b3', off_board?: false, player: player) }
-      let(:rank_unit2) { double('unit', location: 'h3', off_board?: false, player: player) }
+      let(:rank_unit1) { double('unit', location: 'b3', off_board?: false, player:) }
+      let(:rank_unit2) { double('unit', location: 'h3', off_board?: false, player:) }
 
       before do
         allow(rank_unit1).to receive(:instance_of?).and_return(false)
@@ -223,7 +223,7 @@ describe Board do
 
     context 'unit of same type but different color on rank' do
       let(:player) { double('player', color: :white) }
-      let(:rank_unit1) { double('unit', location: 'h8', off_board?: false, player: player) }
+      let(:rank_unit1) { double('unit', location: 'h8', off_board?: false, player:) }
 
       before do
         allow(rank_board).to receive(:units).and_return([rank_unit1])

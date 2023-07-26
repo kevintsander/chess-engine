@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require './lib/helpers/unit/unit_symbol_mapper'
-require './lib/helpers/location_rank_and_file'
+require './lib/chess-engine/helpers/unit/unit_symbol_mapper'
+require './lib/chess-engine/helpers/location_rank_and_file'
 
 # Represents an abstract chess unit
 class Unit

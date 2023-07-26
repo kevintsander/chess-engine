@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/units/bishop'
+require './lib/chess-engine/units/bishop'
 
 describe Bishop do
   describe '#initialize' do

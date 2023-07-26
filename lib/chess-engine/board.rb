@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require './lib/helpers/location_rank_and_file'
-require './lib/helpers/board/board_location_mapper'
-require './lib/helpers/board/board_status_checker'
-require './lib/units/king'
-require './lib/units/queen'
-require './lib/units/bishop'
-require './lib/units/knight'
-require './lib/units/rook'
-require './lib/units/pawn'
+require './lib/chess-engine/helpers/location_rank_and_file'
+require './lib/chess-engine/helpers/board/board_location_mapper'
+require './lib/chess-engine/helpers/board/board_status_checker'
+require './lib/chess-engine/units/king'
+require './lib/chess-engine/units/queen'
+require './lib/chess-engine/units/bishop'
+require './lib/chess-engine/units/knight'
+require './lib/chess-engine/units/rook'
+require './lib/chess-engine/units/pawn'
 
 # Represents a chess board
 class Board
