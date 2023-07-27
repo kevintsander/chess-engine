@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative './lib/chess-engine/units/pawn'
+require_relative '../../lib/chess-engine/units/pawn'
 
-describe Pawn do
+describe ChessEngine::Units::Pawn do
   context 'black pawn' do
     let(:black_player) { double('black_player', name: 'player2', color: :black) }
     subject(:pawn_seven) { described_class.new('g7', black_player) }

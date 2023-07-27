@@ -15,14 +15,15 @@ module ChessEngine
         @test_game = false
 
         def actions_map
-          { normal_move: { class: NormalMoveCommand, validator: method(:valid_standard_move_location?) },
-            jump_move: { class: NormalMoveCommand, validator: method(:valid_jump_move_location?) },
-            normal_attack: { class: AttackMoveCommand, validator: method(:valid_move_attack_location?) },
-            jump_attack: { class: AttackMoveCommand, validator: method(:valid_jump_attack_location?) },
-            initial_double: { class: NormalMoveCommand, validator: method(:valid_initial_double_move_location?) },
-            en_passant: { class: EnPassantCommand, validator: method(:valid_en_passant_location?) },
-            queenside_castle: { class: QueensideCastleCommand, validator: method(:valid_castle_location?) },
-            kingside_castle: { class: KingsideCastleCommand, validator: method(:valid_castle_location?) } }
+          { normal_move: { class: Actions::NormalMoveCommand, validator: method(:valid_standard_move_location?) },
+            jump_move: { class: Actions::NormalMoveCommand, validator: method(:valid_jump_move_location?) },
+            normal_attack: { class: Actions::AttackMoveCommand, validator: method(:valid_move_attack_location?) },
+            jump_attack: { class: Actions::AttackMoveCommand, validator: method(:valid_jump_attack_location?) },
+            initial_double: { class: Actions::NormalMoveCommand,
+                              validator: method(:valid_initial_double_move_location?) },
+            en_passant: { class: Actions::EnPassantCommand, validator: method(:valid_en_passant_location?) },
+            queenside_castle: { class: Actions::QueensideCastleCommand, validator: method(:valid_castle_location?) },
+            kingside_castle: { class: Actions::KingsideCastleCommand, validator: method(:valid_castle_location?) } }
         end
 
         def valid_standard_move_location?(move_action)
@@ -55,7 +56,7 @@ module ChessEngine
         def valid_en_passant_location?(en_passant_action)
           unit = en_passant_action.unit
 
-          return false unless unit.is_a?(Pawn)
+          return false unless unit.is_a?(ChessEngine::Units::Pawn)
 
           return false unless last_action
 
@@ -66,7 +67,7 @@ module ChessEngine
           units_delta = board.location_delta(unit.location, last_unit_location)
           last_move_delta = board.location_delta(last_action.from_location, last_unit_location)
           # if last move was a pawn that moved two ranks, and it is in adjacent column, can jump behind other pawn (en passant)
-          if last_unit.is_a?(Pawn) &&
+          if last_unit.is_a?(ChessEngine::Units::Pawn) &&
              units_delta[1].abs == 1 &&
              units_delta[0].abs.zero? &&
              last_move_delta[0].abs == 2 &&
@@ -80,7 +81,7 @@ module ChessEngine
         def valid_initial_double_move_location?(action)
           unit = action.unit
           move_location = action.location
-          unit.is_a?(Pawn) &&
+          unit.is_a?(ChessEngine::Units::Pawn) &&
             !unit_actions(action.unit)&.any? &&
             !board.enemy_unit_at_location?(unit, move_location) &&
             !board.unit_blocking_move?(unit, move_location)
@@ -89,12 +90,12 @@ module ChessEngine
         def valid_castle_location?(action)
           unit = action.unit
           unit_class = unit.class
-          return false unless [Rook, King].include?(unit_class)
+          return false unless [ChessEngine::Units::Rook, ChessEngine::Units::King].include?(unit_class)
           return false if unit_actions(unit)&.any?
 
-          castle_type = if action.is_a?(KingsideCastleCommand)
+          castle_type = if action.is_a?(ChessEngine::Actions::KingsideCastleCommand)
                           :kingside_castle
-                        elsif action.is_a?(QueensideCastleCommand)
+                        elsif action.is_a?(ChessEngine::Actions::QueensideCastleCommand)
                           :queenside_castle
                         end
 
@@ -117,8 +118,8 @@ module ChessEngine
           return false if [unit, other_unit].any? { |castle_unit| unit_actions(castle_unit)&.any? }
 
           # king cannot pass over space that could be attacked
-          king = unit_class == King ? unit : other_unit
-          king_move_location = unit_class == King ? move_location : other_unit_move_location
+          king = unit_class == ChessEngine::Units::King ? unit : other_unit
+          king_move_location = unit_class == ChessEngine::Units::King ? move_location : other_unit_move_location
           return false if board.enemy_can_attack_move?(king, king_move_location)
 
           true
@@ -167,7 +168,7 @@ module ChessEngine
           new_test_game_units = new_test_game.board.units
           test_unit = new_test_game_units.detect { |unit| unit.location == action.unit.location }
           test_friendly_king = new_test_game_units.detect do |unit|
-            unit.is_a?(King) && unit.player == action.unit.player
+            unit.is_a?(ChessEngine::Units::King) && unit.player == action.unit.player
           end
 
           # get a copy of the action to test
@@ -180,7 +181,7 @@ module ChessEngine
 
         def can_promote_unit?(unit)
           return false unless unit_location = unit.location
-          return false unless unit.is_a?(Pawn)
+          return false unless unit.is_a?(ChessEngine::Units::Pawn)
 
           forward_delta = [0.send(unit.forward, 1), 0]
           test_forward_location = board.delta_location(unit_location, forward_delta)

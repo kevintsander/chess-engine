@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative './lib/chess-engine/actions/normal_move_command'
+require_relative '../../lib/chess-engine/actions/normal_move_command'
 
-describe NormalMoveCommand do
+describe ChessEngine::Actions::NormalMoveCommand do
   let(:board) { double('board') }
   let(:unit) { double('unit', location: 'g4') }
   subject(:normal_move) { described_class.new(board, unit, 'g8') }

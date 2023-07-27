@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative './lib/chess-engine/units/knight'
+require_relative '../../lib/chess-engine/units/knight'
 
-describe Knight do
+describe ChessEngine::Units::Knight do
   describe '#initialize' do
     context 'player color is black' do
       let(:black_player) { double('player', name: 'player1', color: :black) }

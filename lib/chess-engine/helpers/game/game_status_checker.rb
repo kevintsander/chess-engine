@@ -5,11 +5,11 @@ module ChessEngine
     module Game
       module GameStatusChecker
         def check?(king)
-          king.is_a?(King) && board.enemy_can_attack_location?(king, king.location)
+          king.is_a?(ChessEngine::Units::King) && board.enemy_can_attack_location?(king, king.location)
         end
 
         def checkmate?(king)
-          king.is_a?(King) && check?(king) && !friendly_units_have_moves(king) && allowed_actions(king).none?
+          king.is_a?(ChessEngine::Units::King) && check?(king) && !friendly_units_have_moves(king) && allowed_actions(king).none?
         end
 
         def friendly_units_have_moves(unit)
@@ -20,19 +20,19 @@ module ChessEngine
         end
 
         def any_check?
-          board.units.any? { |unit| unit.is_a?(King) && check?(unit) }
+          board.units.any? { |unit| unit.is_a?(ChessEngine::Units::King) && check?(unit) }
         end
 
         def any_checkmate?
-          board.units.any? { |unit| unit.is_a?(King) && checkmate?(unit) }
+          board.units.any? { |unit| unit.is_a?(ChessEngine::Units::King) && checkmate?(unit) }
         end
 
         def stalemate?(king)
-          king.is_a?(King) && !check?(king) && !friendly_units_have_moves(king) && allowed_actions(king).none?
+          king.is_a?(ChessEngine::Units::King) && !check?(king) && !friendly_units_have_moves(king) && allowed_actions(king).none?
         end
 
         def any_stalemate?
-          board.units.any? { |unit| unit.is_a?(King) && stalemate?(unit) }
+          board.units.any? { |unit| unit.is_a?(ChessEngine::Units::King) && stalemate?(unit) }
         end
 
         def fifty_turn_draw?

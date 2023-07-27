@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative './lib/chess-engine/actions/promote_command'
+require_relative '../../lib/chess-engine/actions/promote_command'
 
-describe PromoteCommand do
+describe ChessEngine::Actions::PromoteCommand do
   let(:board) { double('board') }
   let(:player) { double('player') }
   let(:unit) { double('unit', location: 'g8', player:) }

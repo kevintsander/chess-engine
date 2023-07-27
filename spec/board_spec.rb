@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative './lib/chess-engine/board'
+require_relative '../lib/chess-engine/board'
 
-describe Board do
+describe ChessEngine::Board do
   let(:white_player) { double('white_player', color: :white) }
   let(:black_player) { double('black_player', color: :black) }
   let(:game_log) { double('game_log', last_action: nil) }
@@ -90,8 +90,8 @@ describe Board do
 
   describe '#other_castle_unit_move_hash' do
     subject(:board_move_hash) { described_class.new(game_log) }
-    let(:king) { double('king', kingside_start?: true, is_a?: King, location: 'e8') }
-    let(:kingside_rook) { double('rook', kingside_start?: true, is_a?: Rook, location: 'h8') }
+    let(:king) { double('king', kingside_start?: true, is_a?: ChessEngine::Units::King, location: 'e8') }
+    let(:kingside_rook) { double('rook', kingside_start?: true, is_a?: ChessEngine::Units::Rook, location: 'h8') }
 
     it 'returns the other unit and move location' do
       allow(king).to receive(:allowed_actions_deltas).and_return({ kingside_castle: [[0, 2]] })

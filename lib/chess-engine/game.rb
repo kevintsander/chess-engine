@@ -72,7 +72,7 @@ module ChessEngine
       unit = action.unit
       raise ArgumentError, 'Only current player can perform action' if unit.player != current_player
 
-      is_promote_command = action.is_a?(PromoteCommand)
+      is_promote_command = action.is_a?(ChessEngine::Actions::PromoteCommand)
       raise MustPromoteError if last_unit && can_promote_unit?(last_unit) && !is_promote_command
 
       unless is_promote_command || allowed_actions(unit).include?(action)

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative './lib/chess-engine/unit'
+require_relative '../../lib/chess-engine/unit'
 
-describe Unit do
+describe ChessEngine::Unit do
   let(:white_player) { double('white_player', color: :white) }
   let(:black_player) { double('black_player', color: :black) }
 

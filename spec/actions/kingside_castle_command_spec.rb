@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative './lib/chess-engine/actions/kingside_castle_command'
+require_relative '../../lib/chess-engine/actions/kingside_castle_command'
 
-describe KingsideCastleCommand do
+describe ChessEngine::Actions::KingsideCastleCommand do
   let(:board) { double('board') }
   let(:kingside_rook) { double('kingside_rook', location: 'h8') }
   let(:king) { double('king', location: 'e8') }

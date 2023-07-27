@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative './lib/chess-engine/actions/en_passant_command'
+require_relative '../../lib/chess-engine/actions/en_passant_command'
 
-describe EnPassantCommand do
+describe ChessEngine::Actions::EnPassantCommand do
   let(:board) { double('board') }
   let(:en_passanter) { double('en_passanter', location: 'd4', forward: :-) }
   let(:en_passantee) { double('en_passantee', location: 'c4', forward: :+) }

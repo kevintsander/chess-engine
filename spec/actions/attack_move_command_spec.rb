@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative './lib/chess-engine/actions/attack_move_command'
+require_relative '../../lib/chess-engine/actions/attack_move_command'
 
-describe AttackMoveCommand do
+describe ChessEngine::Actions::AttackMoveCommand do
   let(:board) { double('board') }
   let(:attacker) { double('unit', location: 'g4') }
   let(:attackee) { double('unit', location: 'h3') }

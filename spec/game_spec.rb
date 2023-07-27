@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative './lib/chess-engine/game'
+require_relative '../lib/chess-engine/game'
 
-describe Game do
+describe ChessEngine::Game do
   let(:white_player) { double('white_player', color: :white) }
   let(:black_player) { double('black_player', color: :black) }
   let(:blank_board) { double('board', units: []) }
@@ -15,7 +15,7 @@ describe Game do
 
   describe '#allowed_actions' do
     subject(:game_allowed) { blank_game }
-    subject(:board_allowed) { Board.new([]) }
+    subject(:board_allowed) { ChessEngine::Board.new([]) }
 
     matcher :match_locations do |check_locations, action_command_type = nil|
       match do |actions|
@@ -34,9 +34,9 @@ describe Game do
 
     context 'moves inside boundary' do
       it 'returns all moves' do
-        pawn_unit = Pawn.new('c2', white_player)
-        knight_unit = Knight.new('e5', black_player)
-        king_unit = King.new('f6', white_player)
+        pawn_unit = ChessEngine::Units::Pawn.new('c2', white_player)
+        knight_unit = ChessEngine::Units::Knight.new('e5', black_player)
+        king_unit = ChessEngine::Units::King.new('f6', white_player)
         board_allowed.add_unit(pawn_unit)
         pawn_result = game_allowed.allowed_actions(pawn_unit)
         board_allowed.clear_units.add_unit(knight_unit)
@@ -44,20 +44,20 @@ describe Game do
         board_allowed.clear_units.add_unit(king_unit)
         king_result = game_allowed.allowed_actions(king_unit)
 
-        expect(pawn_result).to match_locations(%w[c3 c4], NormalMoveCommand)
-        expect(knight_result).to match_locations(%w[g4 f3 g6 f7 d7 c6 c4 d3], NormalMoveCommand)
-        expect(king_result).to match_locations(%w[g5 g6 g7 f5 f7 e5 e6 e7], NormalMoveCommand)
+        expect(pawn_result).to match_locations(%w[c3 c4], ChessEngine::Actions::NormalMoveCommand)
+        expect(knight_result).to match_locations(%w[g4 f3 g6 f7 d7 c6 c4 d3], ChessEngine::Actions::NormalMoveCommand)
+        expect(king_result).to match_locations(%w[g5 g6 g7 f5 f7 e5 e6 e7], ChessEngine::Actions::NormalMoveCommand)
       end
     end
 
     context 'moves outside of boundary' do
       it 'limits moves' do
-        pawn_unit = Pawn.new('c8', white_player)
-        rook_unit = Rook.new('c3', black_player)
-        knight_unit = Knight.new('h8', black_player)
-        bishop_unit = Bishop.new('e2', white_player)
-        queen_unit = Queen.new('b7', black_player)
-        king_unit = King.new('h8', white_player)
+        pawn_unit = ChessEngine::Units::Pawn.new('c8', white_player)
+        rook_unit = ChessEngine::Units::Rook.new('c3', black_player)
+        knight_unit = ChessEngine::Units::Knight.new('h8', black_player)
+        bishop_unit = ChessEngine::Units::Bishop.new('e2', white_player)
+        queen_unit = ChessEngine::Units::Queen.new('b7', black_player)
+        king_unit = ChessEngine::Units::King.new('h8', white_player)
 
         board_allowed.add_unit(pawn_unit)
         pawn_result = game_allowed.allowed_actions(pawn_unit)
@@ -73,21 +73,23 @@ describe Game do
         king_result = game_allowed.allowed_actions(king_unit)
 
         expect(pawn_result).to be_empty
-        expect(rook_result).to match_locations(%w[c1 c2 c4 c5 c6 c7 c8 a3 b3 d3 e3 f3 g3 h3], NormalMoveCommand)
-        expect(knight_result).to match_locations(%w[f7 g6], NormalMoveCommand)
-        expect(bishop_result).to match_locations(%w[d1 f1 d3 c4 b5 a6 f3 g4 h5], NormalMoveCommand)
+        expect(rook_result).to match_locations(%w[c1 c2 c4 c5 c6 c7 c8 a3 b3 d3 e3 f3 g3 h3],
+                                               ChessEngine::Actions::NormalMoveCommand)
+        expect(knight_result).to match_locations(%w[f7 g6], ChessEngine::Actions::NormalMoveCommand)
+        expect(bishop_result).to match_locations(%w[d1 f1 d3 c4 b5 a6 f3 g4 h5],
+                                                 ChessEngine::Actions::NormalMoveCommand)
         expect(queen_result).to match_locations(%w[a8 a7 a6 b8 c8 c7 d7 e7 f7 g7 h7 c6 d5 e4 f3 g2 h1 b6 b5 b4
-                                                   b3 b2 b1], NormalMoveCommand)
-        expect(king_result).to match_locations(%w[h7 g7 g8], NormalMoveCommand)
+                                                   b3 b2 b1], ChessEngine::Actions::NormalMoveCommand)
+        expect(king_result).to match_locations(%w[h7 g7 g8], ChessEngine::Actions::NormalMoveCommand)
       end
     end
 
     context 'units are blocking moves' do
       it 'returns all moves that are not blocked by units' do
-        blocking_pawn = Pawn.new('e4', black_player)
-        bishop_unit = Bishop.new('c6', white_player)
-        rook_unit = Rook.new('e6', white_player)
-        queen_unit = Queen.new('g4', white_player)
+        blocking_pawn = ChessEngine::Units::Pawn.new('e4', black_player)
+        bishop_unit = ChessEngine::Units::Bishop.new('c6', white_player)
+        rook_unit = ChessEngine::Units::Rook.new('e6', white_player)
+        queen_unit = ChessEngine::Units::Queen.new('g4', white_player)
 
         allow(board_allowed).to receive(:units).and_return([blocking_pawn, bishop_unit, rook_unit, queen_unit])
 
@@ -95,49 +97,50 @@ describe Game do
         rook_result = game_allowed.allowed_actions(rook_unit)
         queen_result = game_allowed.allowed_actions(queen_unit)
 
-        expect(bishop_result).to match_locations(%w[b7 a8 b5 a4 d5 d7 e8], NormalMoveCommand)
-        expect(rook_result).to match_locations(%w[e7 e8 d6 e5 f6 g6 h6], NormalMoveCommand)
-        expect(queen_result).to match_locations(%w[h4 h5 h3 g5 g6 g7 g8 g3 g2 g1 e2 d1 f3 f4 f5], NormalMoveCommand)
+        expect(bishop_result).to match_locations(%w[b7 a8 b5 a4 d5 d7 e8], ChessEngine::Actions::NormalMoveCommand)
+        expect(rook_result).to match_locations(%w[e7 e8 d6 e5 f6 g6 h6], ChessEngine::Actions::NormalMoveCommand)
+        expect(queen_result).to match_locations(%w[h4 h5 h3 g5 g6 g7 g8 g3 g2 g1 e2 d1 f3 f4 f5],
+                                                ChessEngine::Actions::NormalMoveCommand)
       end
     end
 
     context 'unblocked enemies in move range' do
       it 'allows attack' do
-        queen = Queen.new('f6', black_player)
-        enemy_queen = Queen.new('f1', white_player)
-        enemy_knight = Knight.new('d5', white_player)
-        enemy_pawn = Pawn.new('d4', white_player)
-        enemy_bishop = Bishop.new('f8', white_player)
+        queen = ChessEngine::Units::Queen.new('f6', black_player)
+        enemy_queen = ChessEngine::Units::Queen.new('f1', white_player)
+        enemy_knight = ChessEngine::Units::Knight.new('d5', white_player)
+        enemy_pawn = ChessEngine::Units::Pawn.new('d4', white_player)
+        enemy_bishop = ChessEngine::Units::Bishop.new('f8', white_player)
 
         allow(board_allowed).to receive(:units).and_return([queen, enemy_queen, enemy_knight, enemy_pawn, enemy_bishop])
 
         queen_result = game_allowed.allowed_actions(queen)
         enemy_knight_result = game_allowed.allowed_actions(enemy_knight)
 
-        expect(queen_result).to match_locations(%w[f1 f8 d4], AttackMoveCommand)
-        expect(enemy_knight_result).to match_locations(%w[f6], AttackMoveCommand)
+        expect(queen_result).to match_locations(%w[f1 f8 d4], ChessEngine::Actions::AttackMoveCommand)
+        expect(enemy_knight_result).to match_locations(%w[f6], ChessEngine::Actions::AttackMoveCommand)
       end
     end
 
     context 'blocked enemies in move range' do
       it 'do not allow attack' do
-        white_rook = Rook.new('a1', white_player)
-        white_pawn = Pawn.new('a2', white_player)
-        black_rook = Rook.new('a6', black_player)
-        black_bishop = Bishop.new('c1', black_player)
+        white_rook = ChessEngine::Units::Rook.new('a1', white_player)
+        white_pawn = ChessEngine::Units::Pawn.new('a2', white_player)
+        black_rook = ChessEngine::Units::Rook.new('a6', black_player)
+        black_bishop = ChessEngine::Units::Bishop.new('c1', black_player)
 
         allow(board_allowed).to receive(:units).and_return([white_rook, white_pawn, black_rook, black_bishop])
 
         white_rook_result = game_allowed.allowed_actions(white_rook)
         black_rook_result = game_allowed.allowed_actions(black_rook)
 
-        expect(white_rook_result).to match_locations(%w[c1], AttackMoveCommand)
-        expect(black_rook_result).to match_locations(%w[a2], AttackMoveCommand)
+        expect(white_rook_result).to match_locations(%w[c1], ChessEngine::Actions::AttackMoveCommand)
+        expect(black_rook_result).to match_locations(%w[a2], ChessEngine::Actions::AttackMoveCommand)
       end
     end
 
     context 'enemy pawn just moved two spaces' do
-      let(:enemy_pawn_jumped_two) { Pawn.new('d4', white_player) }
+      let(:enemy_pawn_jumped_two) { ChessEngine::Units::Pawn.new('d4', white_player) }
 
       before do
         allow(game_allowed).to receive(:last_action).and_return(double('action', unit: enemy_pawn_jumped_two,
@@ -146,23 +149,25 @@ describe Game do
       end
 
       it 'adjacent pawn can en passant' do
-        adjacent_pawn = Pawn.new('e4', black_player)
+        adjacent_pawn = ChessEngine::Units::Pawn.new('e4', black_player)
         board_allowed.add_unit(enemy_pawn_jumped_two, adjacent_pawn)
         adjacent_pawn_result = game_allowed.allowed_actions(adjacent_pawn)
-        expect(adjacent_pawn_result).to match_locations(['d3'], EnPassantCommand)
+        expect(adjacent_pawn_result).to match_locations(['d3'], ChessEngine::Actions::EnPassantCommand)
       end
 
       it 'non-adjacent pawn cannot en passant' do
-        non_adjacent_pawn = Pawn.new('f4', black_player)
+        non_adjacent_pawn = ChessEngine::Units::Pawn.new('f4', black_player)
         board_allowed.add_unit(enemy_pawn_jumped_two, non_adjacent_pawn)
         non_adjacent_pawn_result = game_allowed.allowed_actions(non_adjacent_pawn)
-        en_passant_move_result = non_adjacent_pawn_result.detect { |action| action.is_a?(EnPassantCommand) }
+        en_passant_move_result = non_adjacent_pawn_result.detect do |action|
+          action.is_a?(ChessEngine::Actions::EnPassantCommand)
+        end
         expect(en_passant_move_result).to be(nil)
       end
     end
 
     context 'pawn has not moved' do
-      let(:new_pawn) { Pawn.new('h7', black_player) }
+      let(:new_pawn) { ChessEngine::Units::Pawn.new('h7', black_player) }
       let(:log_double) { double('game_log', last_action: nil) }
 
       before do
@@ -172,12 +177,12 @@ describe Game do
       it 'allowed to double move' do
         board_allowed.add_unit(new_pawn)
         result = game_allowed.allowed_actions(new_pawn)
-        expect(result).to match_locations(%w[h5 h6], NormalMoveCommand)
+        expect(result).to match_locations(%w[h5 h6], ChessEngine::Actions::NormalMoveCommand)
       end
     end
 
     context 'pawn has moved' do
-      let(:moved_pawn) { Pawn.new('h6', black_player) }
+      let(:moved_pawn) { ChessEngine::Units::Pawn.new('h6', black_player) }
 
       before do
         allow(blank_board).to receive(:units).and_return([moved_pawn])
@@ -188,30 +193,30 @@ describe Game do
       it 'not allowed to double move' do
         board_allowed.add_unit(moved_pawn)
         result = game_allowed.allowed_actions(moved_pawn)
-        expect(result).not_to match_locations(['h4'], NormalMoveCommand)
+        expect(result).not_to match_locations(['h4'], ChessEngine::Actions::NormalMoveCommand)
       end
     end
 
     context 'pawn has not moved, but is blocked by another unit' do
-      let(:new_pawn) { Pawn.new('h7', black_player) }
-      let(:blocking_friendly) { Knight.new('h6', black_player) }
-      let(:enemy_on_space) { Rook.new('h5', white_player) }
+      let(:new_pawn) { ChessEngine::Units::Pawn.new('h7', black_player) }
+      let(:blocking_friendly) { ChessEngine::Units::Knight.new('h6', black_player) }
+      let(:enemy_on_space) { ChessEngine::Units::Rook.new('h5', white_player) }
 
       it 'not allowed to double move' do
         allow(board_allowed).to receive(:units).and_return([new_pawn, blocking_friendly])
         blocking_friendly_result = game_allowed.allowed_actions(new_pawn)
 
-        expect(blocking_friendly_result).not_to match_locations(['h5'], NormalMoveCommand)
+        expect(blocking_friendly_result).not_to match_locations(['h5'], ChessEngine::Actions::NormalMoveCommand)
       end
     end
 
     context 'king and rook have not moved and no units blocking path' do
-      let(:white_queenside_rook) { Rook.new('a1', white_player) }
-      let(:black_queenside_rook) { Rook.new('a8', black_player) }
-      let(:white_kingside_rook) { Rook.new('h1', white_player) }
-      let(:black_kingside_rook) { Rook.new('h8', black_player) }
-      let(:white_king) { King.new('e1', white_player) }
-      let(:black_king) { King.new('e8', black_player) }
+      let(:white_queenside_rook) { ChessEngine::Units::Rook.new('a1', white_player) }
+      let(:black_queenside_rook) { ChessEngine::Units::Rook.new('a8', black_player) }
+      let(:white_kingside_rook) { ChessEngine::Units::Rook.new('h1', white_player) }
+      let(:black_kingside_rook) { ChessEngine::Units::Rook.new('h8', black_player) }
+      let(:white_king) { ChessEngine::Units::King.new('e1', white_player) }
+      let(:black_king) { ChessEngine::Units::King.new('e8', black_player) }
 
       before do
         allow(game_allowed).to receive(:unit_actions)
@@ -228,16 +233,16 @@ describe Game do
         black_queenside_king_result = game_allowed.allowed_actions(black_queenside_rook)
         black_kingside_rook_result = game_allowed.allowed_actions(black_kingside_rook)
 
-        expect(white_king_result).to match_locations(['c1'], QueensideCastleCommand)
+        expect(white_king_result).to match_locations(['c1'], ChessEngine::Actions::QueensideCastleCommand)
       end
     end
 
     context 'king and rook have not moved but units blocking path' do
-      let(:black_queenside_rook) { Rook.new('a8', black_player) }
-      let(:black_kingside_rook) { Rook.new('h8', black_player) }
-      let(:black_king) { King.new('e8', black_player) }
-      let(:white_bishop) { Bishop.new('g8', white_player) }
-      let(:black_queen) { Queen.new('d8', white_player) }
+      let(:black_queenside_rook) { ChessEngine::Units::Rook.new('a8', black_player) }
+      let(:black_kingside_rook) { ChessEngine::Units::Rook.new('h8', black_player) }
+      let(:black_king) { ChessEngine::Units::King.new('e8', black_player) }
+      let(:white_bishop) { ChessEngine::Units::Bishop.new('g8', white_player) }
+      let(:black_queen) { ChessEngine::Units::Queen.new('d8', white_player) }
 
       before do
         board_allowed.add_unit(black_queenside_rook, black_kingside_rook, black_king,
@@ -249,19 +254,19 @@ describe Game do
         black_kingside_rook_result = game_allowed.allowed_actions(black_kingside_rook)
         black_king_result = game_allowed.allowed_actions(black_king)
 
-        expect(black_queenside_rook_result).not_to match_locations(['d8'], QueensideCastleCommand)
-        expect(black_kingside_rook_result).not_to match_locations(['f8'], KingsideCastleCommand)
-        expect(black_king_result).not_to match_locations(['g8'], KingsideCastleCommand)
-        expect(black_king_result).not_to match_locations(['c8'], QueensideCastleCommand)
+        expect(black_queenside_rook_result).not_to match_locations(['d8'], ChessEngine::Actions::QueensideCastleCommand)
+        expect(black_kingside_rook_result).not_to match_locations(['f8'], ChessEngine::Actions::KingsideCastleCommand)
+        expect(black_king_result).not_to match_locations(['g8'], ChessEngine::Actions::KingsideCastleCommand)
+        expect(black_king_result).not_to match_locations(['c8'], ChessEngine::Actions::QueensideCastleCommand)
       end
     end
 
     context 'king and rook have not moved but king move spaces are under attack' do
-      let(:white_queenside_rook) { Rook.new('a1', white_player) }
-      let(:white_kingside_rook) { Rook.new('h1', white_player) }
-      let(:white_king) { King.new('e1', white_player) }
-      let(:black_rook) { Rook.new('f8', black_player) }
-      let(:black_knight) { Knight.new('e3', black_player) }
+      let(:white_queenside_rook) { ChessEngine::Units::Rook.new('a1', white_player) }
+      let(:white_kingside_rook) { ChessEngine::Units::Rook.new('h1', white_player) }
+      let(:white_king) { ChessEngine::Units::King.new('e1', white_player) }
+      let(:black_rook) { ChessEngine::Units::Rook.new('f8', black_player) }
+      let(:black_knight) { ChessEngine::Units::Knight.new('e3', black_player) }
 
       before do
         board_allowed.add_unit(white_queenside_rook, white_kingside_rook, white_king,
@@ -273,17 +278,17 @@ describe Game do
         kingside_rook_result = game_allowed.allowed_actions(white_kingside_rook)
         king_result = game_allowed.allowed_actions(white_king)
 
-        expect(queenside_rook_result).not_to match_locations(['d1'], QueensideCastleCommand)
-        expect(kingside_rook_result).not_to match_locations(['f1'], KingsideCastleCommand)
-        expect(king_result).not_to match_locations(['g1'], KingsideCastleCommand)
-        expect(king_result).not_to match_locations(['c1'], QueensideCastleCommand)
+        expect(queenside_rook_result).not_to match_locations(['d1'], ChessEngine::Actions::QueensideCastleCommand)
+        expect(kingside_rook_result).not_to match_locations(['f1'], ChessEngine::Actions::KingsideCastleCommand)
+        expect(king_result).not_to match_locations(['g1'], ChessEngine::Actions::KingsideCastleCommand)
+        expect(king_result).not_to match_locations(['c1'], ChessEngine::Actions::QueensideCastleCommand)
       end
     end
 
     context 'king or rook have moved' do
-      let(:queenside_rook) { Rook.new('a1', white_player) }
-      let(:kingside_rook) { Rook.new('h1', white_player) }
-      let(:king) { King.new('e1', white_player) }
+      let(:queenside_rook) { ChessEngine::Units::Rook.new('a1', white_player) }
+      let(:kingside_rook) { ChessEngine::Units::Rook.new('h1', white_player) }
+      let(:king) { ChessEngine::Units::King.new('e1', white_player) }
 
       before do
         board_allowed.add_unit(queenside_rook, kingside_rook, king)
@@ -295,26 +300,26 @@ describe Game do
         kingside_rook_result = game_allowed.allowed_actions(kingside_rook)
         king_result = game_allowed.allowed_actions(king)
 
-        expect(queenside_rook_result).not_to match_locations(['d1'], QueensideCastleCommand)
-        expect(kingside_rook_result).not_to match_locations(['f1'], KingsideCastleCommand)
-        expect(king_result).not_to match_locations(['g1'], KingsideCastleCommand)
-        expect(king_result).not_to match_locations(['c1'], QueensideCastleCommand)
+        expect(queenside_rook_result).not_to match_locations(['d1'], ChessEngine::Actions::QueensideCastleCommand)
+        expect(kingside_rook_result).not_to match_locations(['f1'], ChessEngine::Actions::KingsideCastleCommand)
+        expect(king_result).not_to match_locations(['g1'], ChessEngine::Actions::KingsideCastleCommand)
+        expect(king_result).not_to match_locations(['c1'], ChessEngine::Actions::QueensideCastleCommand)
       end
     end
   end
 
   describe '#stalemate?' do
     subject(:game_stalemate) { blank_game }
-    let(:board_stalemate) { Board.new([]) }
-    let(:black_king) { King.new('a8', black_player) }
-    let(:black_queen) { Queen.new('g8', black_player) }
-    let(:black_rook1) { Rook.new('h8', black_player) }
-    let(:black_pawn) { Pawn.new('a5', black_player) }
-    let(:black_rook2) { Rook.new('a2', black_player) }
-    let(:white_pawn1) { Pawn.new('a4', white_player) }
-    let(:white_pawn2) { Pawn.new('c5', white_player) }
-    let(:white_bishop) { Bishop.new('h6', white_player) }
-    let(:white_king) { King.new('h1', white_player) }
+    let(:board_stalemate) { ChessEngine::Board.new([]) }
+    let(:black_king) { ChessEngine::Units::King.new('a8', black_player) }
+    let(:black_queen) { ChessEngine::Units::Queen.new('g8', black_player) }
+    let(:black_rook1) { ChessEngine::Units::Rook.new('h8', black_player) }
+    let(:black_pawn) { ChessEngine::Units::Pawn.new('a5', black_player) }
+    let(:black_rook2) { ChessEngine::Units::Rook.new('a2', black_player) }
+    let(:white_pawn1) { ChessEngine::Units::Pawn.new('a4', white_player) }
+    let(:white_pawn2) { ChessEngine::Units::Pawn.new('c5', white_player) }
+    let(:white_bishop) { ChessEngine::Units::Bishop.new('h6', white_player) }
+    let(:white_king) { ChessEngine::Units::King.new('h1', white_player) }
 
     before do
       allow(game_stalemate).to receive(:board).and_return(board_stalemate)
@@ -333,7 +338,7 @@ describe Game do
 
     context 'king is not in check, but any move will put it in check' do
       it 'returns true' do
-        black_knight = Knight.new('c6', black_player)
+        black_knight = ChessEngine::Units::Knight.new('c6', black_player)
         game_stalemate.board.add_unit(black_knight)
         expect(game_stalemate).to be_stalemate(white_king)
       end
@@ -341,8 +346,8 @@ describe Game do
   end
 
   describe '#check?' do
-    let(:king) { King.new('b2', white_player) }
-    let(:board_check) { Board.new([]) }
+    let(:king) { ChessEngine::Units::King.new('b2', white_player) }
+    let(:board_check) { ChessEngine::Board.new([]) }
     subject(:game_check) { blank_game }
 
     before do
@@ -351,7 +356,7 @@ describe Game do
 
     context 'king unit is in check' do
       it 'returns true' do
-        enemy_bishop = Bishop.new('f6', black_player)
+        enemy_bishop = ChessEngine::Units::Bishop.new('f6', black_player)
         allow(board_check).to receive(:units).and_return([king, enemy_bishop])
         expect(game_check).to be_check(king)
       end
@@ -359,7 +364,7 @@ describe Game do
 
     context 'king unit is not in check' do
       it 'returns false' do
-        enemy_bishop = Bishop.new('e6', black_player)
+        enemy_bishop = ChessEngine::Units::Bishop.new('e6', black_player)
         allow(board_check).to receive(:units).and_return([king, enemy_bishop])
         expect(game_check).not_to be_check(king)
       end
@@ -367,10 +372,10 @@ describe Game do
   end
 
   describe '#checkmate?' do
-    let(:white_king) { King.new('h1', white_player) }
-    let(:black_rook) { Rook.new('g5', black_player) }
-    let(:black_knight) { Knight.new('f2', black_player) }
-    let(:board_checkmate) { Board.new([]) }
+    let(:white_king) { ChessEngine::Units::King.new('h1', white_player) }
+    let(:black_rook) { ChessEngine::Units::Rook.new('g5', black_player) }
+    let(:black_knight) { ChessEngine::Units::Knight.new('f2', black_player) }
+    let(:board_checkmate) { ChessEngine::Board.new([]) }
     subject(:game_checkmate) { blank_game }
 
     before do
@@ -380,7 +385,7 @@ describe Game do
 
     context 'king is in check but still has possible moves' do
       it 'returns false' do
-        black_bishop = Bishop.new('c8', black_player)
+        black_bishop = ChessEngine::Units::Bishop.new('c8', black_player)
         board_checkmate.add_unit(black_bishop)
         expect(game_checkmate).not_to be_checkmate(white_king)
       end
@@ -388,7 +393,7 @@ describe Game do
 
     context 'king is in check and has no possible moves' do
       it 'returns true' do
-        black_bishop = Bishop.new('b8', black_player)
+        black_bishop = ChessEngine::Units::Bishop.new('b8', black_player)
         board_checkmate.add_unit(black_bishop)
         expect(game_checkmate).to be_checkmate(white_king)
       end
@@ -401,7 +406,7 @@ describe Game do
 
     context 'pawn is on last space' do
       it 'returns true' do
-        promotable_pawn = Pawn.new('b1', black_player)
+        promotable_pawn = ChessEngine::Units::Pawn.new('b1', black_player)
         allow(board_can_promote).to receive(:delta_location).with('b1', [-1, 0]).and_return(nil)
         allow(game_can_promote).to receive(:board).and_return(board_can_promote)
         expect(game_can_promote).to be_can_promote_unit(promotable_pawn)
@@ -410,7 +415,7 @@ describe Game do
 
     context 'pawn is not on last space' do
       it 'returns false' do
-        promotable_pawn = Pawn.new('b2', black_player)
+        promotable_pawn = ChessEngine::Units::Pawn.new('b2', black_player)
         allow(board_can_promote).to receive(:delta_location).with('b2', [-1, 0]).and_return('b1')
         allow(game_can_promote).to receive(:board).and_return(board_can_promote)
         expect(game_can_promote).not_to be_can_promote_unit(promotable_pawn)
