@@ -15,7 +15,7 @@ describe ChessEngine::Game do
 
   describe '#allowed_actions' do
     subject(:game_allowed) { blank_game }
-    subject(:board_allowed) { ChessEngine::Board.new([]) }
+    let(:board_allowed) { ChessEngine::Board.new([]) }
 
     matcher :match_locations do |check_locations, action_command_type = nil|
       match do |actions|
@@ -549,6 +549,53 @@ describe ChessEngine::Game do
           game_perform.perform_action(action)
           expect(game_perform.turn).to eq(10)
         end
+      end
+    end
+  end
+
+  describe '#select_actionable_unit' do
+    subject(:game_select) { described_class.new([white_player, black_player]) }
+    let(:board_select) { ChessEngine::Board.new([]) }
+    let(:h7_pawn) { ChessEngine::Units::Pawn.new('h7', black_player) }
+
+    before do
+      board_select.add_unit(h7_pawn)
+      allow(game_select).to receive(:board).and_return(board_select)
+    end
+
+    context 'unit is at location for current player' do
+      before do
+        allow(game_select).to receive(:current_player).and_return(black_player)
+      end
+
+      it 'unit at location is selected' do
+        unit = game_select.select_actionable_unit('h7')
+
+        expect(unit).to be(h7_pawn)
+      end
+    end
+
+    context 'unit is at location but not for current player' do
+      before do
+        allow(game_select).to receive(:current_player).and_return(white_player)
+      end
+
+      it 'unit at location is not selected' do
+        unit = game_select.select_actionable_unit('h7')
+
+        expect(unit).to be_nil
+      end
+    end
+
+    context 'unit is not at location' do
+      before do
+        allow(game_select).to receive(:current_player).and_return(black_player)
+      end
+
+      it 'no unit is selected' do
+        unit = game_select.select_actionable_unit('a7')
+
+        expect(unit).to be_nil
       end
     end
   end

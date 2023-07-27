@@ -11,7 +11,6 @@ module ChessEngine
 
         def get_color_symbol(color)
           unit_type = self.class.name.split('::').last.downcase.to_sym
-          puts unit_type
           return unless SYMBOLS.key?(unit_type)
 
           SYMBOLS[unit_type][color]

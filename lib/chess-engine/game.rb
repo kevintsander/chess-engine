@@ -112,6 +112,15 @@ module ChessEngine
       (players - [player]).first
     end
 
+    def select_actionable_unit(location)
+      unit_at_location = board.unit_at(location)
+      puts board.units
+      if unit_at_location&.player == current_player && units_with_actions(current_player).include?(unit_at_location)
+        unit = unit_at_location
+      end
+      unit
+    end
+
     private
 
     def switch_current_player
