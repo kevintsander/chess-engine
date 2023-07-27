@@ -121,6 +121,10 @@ module ChessEngine
       unit
     end
 
+    def select_allowed_action(unit, move_location)
+      game.allowed_actions(unit).detect { |action| action.location_notation == move_location }
+    end
+
     private
 
     def switch_current_player
