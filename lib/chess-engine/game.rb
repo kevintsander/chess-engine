@@ -114,7 +114,6 @@ module ChessEngine
 
     def select_actionable_unit(location)
       unit_at_location = board.unit_at(location)
-      puts board.units
       if unit_at_location&.player == current_player && units_with_actions(current_player).include?(unit_at_location)
         unit = unit_at_location
       end
@@ -122,7 +121,7 @@ module ChessEngine
     end
 
     def select_allowed_action(unit, move_location)
-      game.allowed_actions(unit).detect { |action| action.location_notation == move_location }
+      allowed_actions(unit).detect { |action| action.location_notation == move_location }
     end
 
     private
