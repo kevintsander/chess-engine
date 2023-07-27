@@ -22,6 +22,10 @@ module ChessEngine
       @allowed_actions_deltas = nil
     end
 
+    def name
+      self.class.name.split('::').last
+    end
+
     def off_board?
       !location
     end

@@ -10,7 +10,7 @@ module ChessEngine
                     pawn: { white: '♙', black: '♟' } }.freeze
 
         def get_color_symbol(color)
-          unit_type = self.class.name.split('::').last.downcase.to_sym
+          unit_type = name.downcase.to_sym
           return unless SYMBOLS.key?(unit_type)
 
           SYMBOLS[unit_type][color]
