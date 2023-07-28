@@ -4,7 +4,6 @@ require_relative './board'
 require_relative './helpers/game/game_logger'
 require_relative './helpers/game/game_action_checker'
 require_relative './helpers/game/game_status_checker'
-require_relative './helpers/game/game_file_handler'
 require_relative './errors/game_errors'
 require_relative './actions/promote_command'
 
@@ -15,7 +14,6 @@ module ChessEngine
     include Helpers::Game::GameLogger
     include Helpers::Game::GameActionChecker
     include Helpers::Game::GameStatusChecker
-    include Helpers::Game::GameFileHandler
 
     attr_reader :board, :game_log, :players, :turn, :current_player, :player_draw
 
