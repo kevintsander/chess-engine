@@ -39,7 +39,7 @@ module ChessEngine
       raise ArgumentError "#{path} doesn't exist" unless all_saves.include?(path)
 
       file = File.read(path)
-      YAML.load(file)
+      YAML.unsafe_load(file)
     end
 
     def self.included(base)
@@ -53,6 +53,11 @@ module ChessEngine
 
     def file_name(path)
       File.basename(path, '.*')
+    end
+
+    def save_game(game, save_name)
+      Dir.mkdir(@save_dir) unless Dir.exist?(@save_dir)
+      File.write(File.join(@save_dir, "#{save_name}.yaml"), YAML.dump(game))
     end
   end
 end
