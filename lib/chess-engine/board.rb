@@ -19,9 +19,8 @@ module ChessEngine
 
     attr_reader :units
 
-    def initialize(game_log)
+    def initialize
       clear_units
-      @game_log = game_log
     end
 
     def clear_units

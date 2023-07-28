@@ -5,10 +5,9 @@ require_relative '../lib/chess-engine/board'
 describe ChessEngine::Board do
   let(:white_player) { double('white_player', color: :white) }
   let(:black_player) { double('black_player', color: :black) }
-  let(:game_log) { double('game_log', last_action: nil) }
 
   describe '#unit_at' do
-    subject(:board) { described_class.new(game_log) }
+    subject(:board) { described_class.new }
     let(:unit) { double('unit', location: 'g3') }
 
     before do
@@ -31,7 +30,7 @@ describe ChessEngine::Board do
   end
 
   describe '#unit_blocking_move?' do
-    subject(:board_block) { described_class.new(game_log) }
+    subject(:board_block) { described_class.new }
 
     context 'horizontal move with no other units between' do
       let(:move_unit) { double('unit', location: 'g2', player: white_player) }
@@ -89,7 +88,7 @@ describe ChessEngine::Board do
   end
 
   describe '#other_castle_unit_move_hash' do
-    subject(:board_move_hash) { described_class.new(game_log) }
+    subject(:board_move_hash) { described_class.new }
     let(:king) { double('king', kingside_start?: true, is_a?: ChessEngine::Units::King, location: 'e8') }
     let(:kingside_rook) { double('rook', kingside_start?: true, is_a?: ChessEngine::Units::Rook, location: 'h8') }
 
@@ -102,7 +101,7 @@ describe ChessEngine::Board do
   end
 
   describe '#units_at_file' do
-    subject(:file_board) { described_class.new(game_log) }
+    subject(:file_board) { described_class.new }
 
     context 'unit(s) of specified color and type are located at file' do
       let(:player) { double('player', color: :black) }
@@ -170,7 +169,7 @@ describe ChessEngine::Board do
   end
 
   describe '#units_at_rank' do
-    subject(:rank_board) { described_class.new(game_log) }
+    subject(:rank_board) { described_class.new }
 
     context 'unit(s) of specified color and type are loated at rank' do
       let(:player) { double('player', color: :black) }

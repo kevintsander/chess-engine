@@ -25,7 +25,7 @@ module ChessEngine
     def initialize(players = [])
       @players = players
       @game_log = []
-      @board = Board.new(game_log)
+      @board = Board.new
       @allowed_actions_cache = {}
     end
 

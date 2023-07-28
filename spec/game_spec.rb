@@ -15,7 +15,7 @@ describe ChessEngine::Game do
 
   describe '#allowed_actions' do
     subject(:game_allowed) { blank_game }
-    let(:board_allowed) { ChessEngine::Board.new([]) }
+    let(:board_allowed) { ChessEngine::Board.new }
 
     matcher :match_locations do |check_locations, action_command_type = nil|
       match do |actions|
@@ -310,7 +310,7 @@ describe ChessEngine::Game do
 
   describe '#stalemate?' do
     subject(:game_stalemate) { blank_game }
-    let(:board_stalemate) { ChessEngine::Board.new([]) }
+    let(:board_stalemate) { ChessEngine::Board.new }
     let(:black_king) { ChessEngine::Units::King.new('a8', black_player) }
     let(:black_queen) { ChessEngine::Units::Queen.new('g8', black_player) }
     let(:black_rook1) { ChessEngine::Units::Rook.new('h8', black_player) }
@@ -347,7 +347,7 @@ describe ChessEngine::Game do
 
   describe '#check?' do
     let(:king) { ChessEngine::Units::King.new('b2', white_player) }
-    let(:board_check) { ChessEngine::Board.new([]) }
+    let(:board_check) { ChessEngine::Board.new }
     subject(:game_check) { blank_game }
 
     before do
@@ -375,7 +375,7 @@ describe ChessEngine::Game do
     let(:white_king) { ChessEngine::Units::King.new('h1', white_player) }
     let(:black_rook) { ChessEngine::Units::Rook.new('g5', black_player) }
     let(:black_knight) { ChessEngine::Units::Knight.new('f2', black_player) }
-    let(:board_checkmate) { ChessEngine::Board.new([]) }
+    let(:board_checkmate) { ChessEngine::Board.new }
     subject(:game_checkmate) { blank_game }
 
     before do
@@ -555,7 +555,7 @@ describe ChessEngine::Game do
 
   describe '#select_actionable_unit' do
     subject(:game_select) { described_class.new([white_player, black_player]) }
-    let(:board_select) { ChessEngine::Board.new([]) }
+    let(:board_select) { ChessEngine::Board.new }
     let(:h7_pawn) { ChessEngine::Units::Pawn.new('h7', black_player) }
 
     before do
