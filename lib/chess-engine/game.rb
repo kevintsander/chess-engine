@@ -79,12 +79,15 @@ module ChessEngine
       end
 
       action.perform_action
-      @allowed_actions_cache = {} # reset allowed actions cache
+      # @allowed_actions_cache = {} # reset allowed actions cache
       log_action(action)
       return if game_over?
 
       switch_current_player unless can_promote_unit?(unit)
-      @turn += 1 if turn_over?
+      return unless turn_over?
+
+      update_allowed_actions
+      @turn += 1
     end
 
     def new_game_units
@@ -123,6 +126,16 @@ module ChessEngine
     end
 
     private
+
+    def update_allowed_actions
+      @allowed_actions_cache = {}
+      # non-captured friendly units
+      valid_units = board.units.select { |u| u.player == current_player && !u.captured }
+      valid_units.each do |unit|
+        unit_allowed_actions = allowed_actions(unit)
+        @allowed_actions_cache[unit] = unit_allowed_actions if unit_allowed_actions
+      end
+    end
 
     def switch_current_player
       @current_player = other_player(current_player)

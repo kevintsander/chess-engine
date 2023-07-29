@@ -8,11 +8,20 @@ module ChessEngine
     class EnPassantCommand < ActionCommand
       DISPLAY_NAME = 'En passant'
 
+      def initialize(board, unit, location)
+        super(board, unit, location)
+        set_captured_unit
+      end
+
       def perform_moves
-        captured_unit = board.unit_at(location, [-1 * 0.send(unit.forward, 1), 0])
         unit.move(location)
-        captured_unit.capture
-        @captured_unit = captured_unit
+        @captured_unit.capture
+      end
+
+      private
+
+      def set_captured_unit
+        @captured_unit = board.unit_at(location, [-1 * 0.send(unit.forward, 1), 0])
       end
     end
   end

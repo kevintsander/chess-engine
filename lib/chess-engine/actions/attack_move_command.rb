@@ -8,11 +8,20 @@ module ChessEngine
     class AttackMoveCommand < ActionCommand
       DISPLAY_NAME = 'Attack move'
 
+      def initialize(board, unit, location)
+        super(board, unit, location)
+        set_captured_unit
+      end
+
       def perform_moves
-        captured_unit = board.unit_at(location)
         unit.move(location)
-        captured_unit.capture
-        @captured_unit = captured_unit
+        @captured_unit.capture
+      end
+
+      private
+
+      def set_captured_unit
+        @captured_unit = board.unit_at(location)
       end
     end
   end

@@ -3,7 +3,7 @@
 # Represents a chess move
 module ChessEngine
   class ActionCommand
-    attr_reader :board, :unit, :location, :action, :captured_unit, :from_location
+    attr_reader :unit, :location, :action, :captured_unit
 
     def initialize(board, unit, location)
       @board = board
@@ -25,5 +25,9 @@ module ChessEngine
       @from_location = unit.location
       perform_moves
     end
+
+    private
+
+    attr_reader :board, :from_location
   end
 end
