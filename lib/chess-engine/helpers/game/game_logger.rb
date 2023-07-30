@@ -13,13 +13,13 @@ module ChessEngine
         end
 
         def last_unit
-          last_action&.unit
+          last_action&.moves&.[](0)&.unit
         end
 
         def unit_actions(unit)
           @game_log.each_with_object([]) do |log_item, unit_actions|
             action = log_item[:action]
-            unit_actions << action if action.unit == unit
+            unit_actions << action if action.moves.any? { |m| m.unit == unit }
           end
         end
       end

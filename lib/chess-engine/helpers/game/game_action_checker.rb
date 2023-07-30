@@ -27,45 +27,51 @@ module ChessEngine
         end
 
         def valid_standard_move_location?(move_action)
-          unit = move_action.unit
-          move_location = move_action.location
+          move = move_action.moves[0]
+          unit = move.unit
+          move_location = move.location
           !board.enemy_unit_at_location?(unit,
                                          move_location) && !board.unit_blocking_move?(unit,
                                                                                       move_location)
         end
 
         def valid_move_attack_location?(attack_action)
-          unit = attack_action.unit
-          move_location = attack_action.location
+          move = attack_action.moves[0]
+          unit = move.unit
+          move_location = move.location
           board.enemy_unit_at_location?(unit,
                                         move_location) && !board.unit_blocking_move?(unit,
                                                                                      move_location)
         end
 
         def valid_jump_move_location?(jump_action)
-          move_location = jump_action.location
+          move = jump_action.moves[0]
+          move_location = move.location
           !board.unit_at(move_location)
         end
 
         def valid_jump_attack_location?(jump_attack_action)
-          unit = jump_attack_action.unit
-          move_location = jump_attack_action.location
+          move = jump_attack_action.moves[0]
+          unit = move.unit
+          move_location = move.location
           board.enemy_unit_at_location?(unit, move_location)
         end
 
         def valid_en_passant_location?(en_passant_action)
-          unit = en_passant_action.unit
+          move = en_passant_action.moves[0]
+          unit = move.unit
 
           return false unless unit.is_a?(ChessEngine::Units::Pawn)
 
           return false unless last_action
 
-          move_location = en_passant_action.location
+          move_location = move.location
           last_unit_location = last_unit.location
           return false unless last_unit_location
 
           units_delta = board.location_delta(unit.location, last_unit_location)
-          last_move_delta = board.location_delta(last_action.from_location, last_unit_location)
+          last_action_move = last_action.moves[0]
+          last_move_delta = board.location_delta(last_action_move.from_location, last_unit_location)
           # if last move was a pawn that moved two ranks, and it is in adjacent column, can jump behind other pawn (en passant)
           if last_unit.is_a?(ChessEngine::Units::Pawn) &&
              units_delta[1].abs == 1 &&
@@ -78,35 +84,39 @@ module ChessEngine
           end
         end
 
-        def valid_initial_double_move_location?(action)
-          unit = action.unit
-          move_location = action.location
+        def valid_initial_double_move_location?(double_move_action)
+          move = double_move_action.moves[0]
+          unit = move.unit
+          move_location = move.location
           unit.is_a?(ChessEngine::Units::Pawn) &&
-            !unit_actions(action.unit)&.any? &&
+            !unit_actions(unit)&.any? &&
             !board.enemy_unit_at_location?(unit, move_location) &&
             !board.unit_blocking_move?(unit, move_location)
         end
 
-        def valid_castle_location?(action)
-          unit = action.unit
+        def valid_castle_location?(castle_action)
+          unit_move = castle_action.moves[0]
+          unit = unit_move.unit
+
           unit_class = unit.class
           return false unless [ChessEngine::Units::Rook, ChessEngine::Units::King].include?(unit_class)
           return false if unit_actions(unit)&.any?
 
-          castle_type = if action.is_a?(ChessEngine::Actions::KingsideCastleCommand)
-                          :kingside_castle
-                        elsif action.is_a?(ChessEngine::Actions::QueensideCastleCommand)
-                          :queenside_castle
-                        end
+          # castle_type = if castle_action.is_a?(ChessEngine::Actions::KingsideCastleCommand)
+          #                 :kingside_castle
+          #               elsif castle_action.is_a?(ChessEngine::Actions::QueensideCastleCommand)
+          #                 :queenside_castle
+          #               end
 
-          other_unit_hash = board.other_castle_unit_move_hash(unit, castle_type)
-          return false unless other_unit_hash&.any?
+          # other_unit_hash = board.other_castle_unit_move(unit, castle_type)
+          # return false unless other_unit_hash&.any?
 
-          move_location = action.location
-          other_unit = other_unit_hash[:unit]
+          move_location = unit_move.location
+          other_unit_move = castle_action.moves[1]
+          other_unit = other_unit_move.unit
           return false if unit_actions(other_unit)&.any?
 
-          other_unit_move_location = other_unit_hash[:move_location]
+          other_unit_move_location = other_unit_move.location
 
           # cannot be blocked or have an enemy on the move space
           return false if board.enemy_unit_at_location?(unit, move_location) ||
@@ -166,13 +176,14 @@ module ChessEngine
           # create a test game
           new_test_game = get_test_game_copy
           new_test_game_units = new_test_game.board.units
-          test_unit = new_test_game_units.detect { |unit| unit.location == action.unit.location }
+          move = action.moves[0]
+          test_unit = new_test_game_units.detect { |unit| unit.location == move.from_location }
           test_friendly_king = new_test_game_units.detect do |unit|
-            unit.is_a?(ChessEngine::Units::King) && unit.player == action.unit.player
+            unit.is_a?(ChessEngine::Units::King) && unit.player == move.unit.player
           end
 
           # get a copy of the action to test
-          test_action = action.class.new(new_test_game.board, test_unit, action.location)
+          test_action = action.class.new(new_test_game.board, test_unit, move.location)
 
           test_action.perform_action
 

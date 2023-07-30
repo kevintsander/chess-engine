@@ -8,17 +8,17 @@ module ChessEngine
     class KingsideCastleCommand < ActionCommand
       DISPLAY_NAME = 'Kingside castle'
 
-      def location_notation
-        'O-O'
+      def initialize(board, unit, location)
+        super(board, unit, location)
+        @location_notation = 'O-O'
+        initialize_other_unit_move(board)
       end
 
-      def perform_moves
-        other_castle_unit_move_hash = board.other_castle_unit_move_hash(unit, :kingside_castle)
-        other_unit = other_castle_unit_move_hash[:unit]
-        other_unit_move_location = other_castle_unit_move_hash[:move_location]
+      private
 
-        unit.move(location)
-        other_unit.move(other_unit_move_location)
+      def initialize_other_unit_move(board)
+        unit = moves[0].unit
+        moves.push(board.other_castle_unit_move(unit, :kingside_castle))
       end
     end
   end

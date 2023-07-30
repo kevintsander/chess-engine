@@ -10,18 +10,15 @@ module ChessEngine
 
       def initialize(board, unit, location)
         super(board, unit, location)
-        set_captured_unit
-      end
-
-      def perform_moves
-        unit.move(location)
-        @captured_unit.capture
+        initialize_capture_unit(board)
       end
 
       private
 
-      def set_captured_unit
-        @captured_unit = board.unit_at(location)
+      def initialize_capture_unit(board)
+        move = moves[0]
+        location = move.location
+        @capture_unit = board.unit_at(location)
       end
     end
   end

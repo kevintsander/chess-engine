@@ -9,6 +9,7 @@ require_relative './units/bishop'
 require_relative './units/knight'
 require_relative './units/rook'
 require_relative './units/pawn'
+require_relative './actions/unit_move'
 
 # Represents a chess board
 module ChessEngine
@@ -78,7 +79,7 @@ module ChessEngine
       end
     end
 
-    def other_castle_unit_move_hash(unit, castle_type)
+    def other_castle_unit_move(unit, castle_type)
       friendly_units(unit) do |friendly|
         next if castle_type == :kingside_castle && !friendly.kingside_start?
         if castle_type == :queenside_castle && !friendly.is_a?(ChessEngine::Units::King) && !friendly.queenside_start?
@@ -89,7 +90,7 @@ module ChessEngine
         delta = friendly.allowed_actions_deltas[castle_type]&.first
         next unless delta
 
-        return { unit: friendly, move_location: delta_location(friendly.location, delta) }
+        return Actions::UnitMove.new(friendly, delta_location(friendly.location, delta))
       end
       nil
     end

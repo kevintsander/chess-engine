@@ -20,7 +20,6 @@ module ChessEngine
     @current_player = nil
     @turn = 0
     @player_draw = false
-    @pgn_fast_forward = false
 
     def initialize(players = [])
       @players = players
@@ -49,8 +48,8 @@ module ChessEngine
 
     def both_players_played?
       turn_logs = game_log.select { |log_item| log_item[:turn] == turn }
-      player1_played = turn_logs&.select { |log_item| log_item[:action].unit.player == players[0] }&.any?
-      player2_played = turn_logs&.select { |log_item| log_item[:action].unit.player == players[1] }&.any?
+      player1_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.player == players[0] }&.any?
+      player2_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.player == players[1] }&.any?
       player1_played && player2_played
     end
 
@@ -67,7 +66,8 @@ module ChessEngine
       raise GameNotStartedError if turn.zero?
       raise GameAlreadyOverError if game_over?
 
-      unit = action.unit
+      move = action.moves[0]
+      unit = move.unit
       raise ArgumentError, 'Only current player can perform action' if unit.player != current_player
 
       is_promote_command = action.is_a?(ChessEngine::Actions::PromoteCommand)
@@ -79,6 +79,7 @@ module ChessEngine
       end
 
       action.perform_action
+      update_allowed_actions
       # @allowed_actions_cache = {} # reset allowed actions cache
       log_action(action)
       return if game_over?
@@ -86,7 +87,6 @@ module ChessEngine
       switch_current_player unless can_promote_unit?(unit)
       return unless turn_over?
 
-      update_allowed_actions
       @turn += 1
     end
 

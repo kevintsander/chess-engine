@@ -1,33 +1,23 @@
 # frozen_string_literal: true
 
+require_relative './actions/unit_move'
+
 # Represents a chess move
 module ChessEngine
   class ActionCommand
-    attr_reader :unit, :location, :action, :captured_unit
+    attr_reader :moves, :capture_unit, :location_notation
 
-    def initialize(board, unit, location)
-      @board = board
-      @unit = unit
-      @location = location
-      @from_location = nil
-      @captured_unit = nil
-    end
-
-    def ==(other)
-      other.class == self.class && other.board == board && other.unit == unit && other.location == location
-    end
-
-    def location_notation
-      location
+    def initialize(_board, unit, location)
+      @moves = [Actions::UnitMove.new(unit, location)]
+      @location_notation = location
+      @capture_unit = nil
     end
 
     def perform_action
-      @from_location = unit.location
-      perform_moves
+      moves.each do |move|
+        move.unit.move(move.location)
+      end
+      capture_unit&.capture
     end
-
-    private
-
-    attr_reader :board, :from_location
   end
 end
