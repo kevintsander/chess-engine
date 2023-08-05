@@ -10,6 +10,10 @@ module ChessEngine
         @location = location
         @from_location = unit.location
       end
+
+      def ==(other)
+        other.unit == unit && other.location == location
+      end
     end
   end
 end

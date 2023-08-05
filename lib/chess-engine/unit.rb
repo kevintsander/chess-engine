@@ -9,7 +9,7 @@ module ChessEngine
     include Helpers::Unit::UnitSymbolMapper
     include Helpers::LocationRankAndFile
 
-    attr_reader :location, :player, :id, :symbol, :captured, :promoted
+    attr_reader :location, :player, :id, :symbol, :captured, :promoted, :initial_location
 
     def initialize(location, player, id = location)
       @location = location

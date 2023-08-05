@@ -102,18 +102,18 @@ module ChessEngine
           return false unless [ChessEngine::Units::Rook, ChessEngine::Units::King].include?(unit_class)
           return false if unit_actions(unit)&.any?
 
-          # castle_type = if castle_action.is_a?(ChessEngine::Actions::KingsideCastleCommand)
-          #                 :kingside_castle
-          #               elsif castle_action.is_a?(ChessEngine::Actions::QueensideCastleCommand)
-          #                 :queenside_castle
-          #               end
+          castle_type = if castle_action.is_a?(ChessEngine::Actions::KingsideCastleCommand)
+                          :kingside_castle
+                        elsif castle_action.is_a?(ChessEngine::Actions::QueensideCastleCommand)
+                          :queenside_castle
+                        end
 
-          # other_unit_hash = board.other_castle_unit_move(unit, castle_type)
-          # return false unless other_unit_hash&.any?
+          other_unit_allowed_move = board.other_castle_unit_move(unit, castle_type)
 
           move_location = unit_move.location
           other_unit_move = castle_action.moves[1]
           other_unit = other_unit_move.unit
+          return false if other_unit_allowed_move != other_unit_move
           return false if unit_actions(other_unit)&.any?
 
           other_unit_move_location = other_unit_move.location
@@ -136,7 +136,7 @@ module ChessEngine
         end
 
         def allowed_actions(unit)
-          allowed_actions_cached = @allowed_actions_cache[unit]
+          allowed_actions_cached = @allowed_actions_cache[unit.initial_location]
           unless allowed_actions_cached
             allowed = []
             return allowed unless unit.location
@@ -156,9 +156,9 @@ module ChessEngine
                 allowed << action
               end
             end
-            @allowed_actions_cache[unit] = allowed
+            @allowed_actions_cache[unit.initial_location] = allowed
           end
-          @allowed_actions_cache[unit]
+          @allowed_actions_cache[unit.initial_location]
         end
 
         def units_with_actions(player)
