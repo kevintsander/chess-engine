@@ -112,6 +112,8 @@ module ChessEngine
 
           move_location = unit_move.location
           other_unit_move = castle_action.moves[1]
+          return false unless other_unit_move
+
           other_unit = other_unit_move.unit
           return false if other_unit_allowed_move != other_unit_move
           return false if unit_actions(other_unit)&.any?
@@ -136,7 +138,7 @@ module ChessEngine
         end
 
         def allowed_actions(unit)
-          allowed_actions_cached = @allowed_actions_cache[unit.initial_location]
+          allowed_actions_cached = @allowed_actions_cache[unit.location]
           unless allowed_actions_cached
             allowed = []
             return allowed unless unit.location
@@ -156,9 +158,9 @@ module ChessEngine
                 allowed << action
               end
             end
-            @allowed_actions_cache[unit.initial_location] = allowed
+            @allowed_actions_cache[unit.location] = allowed
           end
-          @allowed_actions_cache[unit.initial_location]
+          @allowed_actions_cache[unit.location]
         end
 
         def units_with_actions(player)

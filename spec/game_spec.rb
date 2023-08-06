@@ -20,7 +20,8 @@ describe ChessEngine::Game do
     matcher :match_locations do |check_locations, action_command_type = nil|
       match do |actions|
         test_actions = action_command_type ? actions.select { |action| action.is_a?(action_command_type) } : actions
-        test_actions_locations = test_actions.map(&:location)
+        test_actions_moves = test_actions.map { |action| action.moves }.flatten
+        test_actions_locations = test_actions_moves.map { |move| move&.location }
         check_locations.each do |check_location|
           return false unless test_actions_locations.include?(check_location)
         end
@@ -39,8 +40,10 @@ describe ChessEngine::Game do
         king_unit = ChessEngine::Units::King.new('f6', white_player)
         board_allowed.add_unit(pawn_unit)
         pawn_result = game_allowed.allowed_actions(pawn_unit)
+        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
         board_allowed.clear_units.add_unit(knight_unit)
         knight_result = game_allowed.allowed_actions(knight_unit)
+        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
         board_allowed.clear_units.add_unit(king_unit)
         king_result = game_allowed.allowed_actions(king_unit)
 
@@ -61,14 +64,19 @@ describe ChessEngine::Game do
 
         board_allowed.add_unit(pawn_unit)
         pawn_result = game_allowed.allowed_actions(pawn_unit)
+        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
         board_allowed.clear_units.add_unit(rook_unit)
         rook_result = game_allowed.allowed_actions(rook_unit)
+        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
         board_allowed.clear_units.add_unit(knight_unit)
         knight_result = game_allowed.allowed_actions(knight_unit)
+        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
         board_allowed.clear_units.add_unit(bishop_unit)
         bishop_result = game_allowed.allowed_actions(bishop_unit)
+        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
         board_allowed.clear_units.add_unit(queen_unit)
         queen_result = game_allowed.allowed_actions(queen_unit)
+        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
         board_allowed.clear_units.add_unit(king_unit)
         king_result = game_allowed.allowed_actions(king_unit)
 
@@ -143,8 +151,9 @@ describe ChessEngine::Game do
       let(:enemy_pawn_jumped_two) { ChessEngine::Units::Pawn.new('d4', white_player) }
 
       before do
-        allow(game_allowed).to receive(:last_action).and_return(double('action', unit: enemy_pawn_jumped_two,
-                                                                                 from_location: 'd2'))
+        allow(game_allowed).to receive(:last_action).and_return(double('action',
+                                                                       moves: [double('move',
+                                                                                      unit: enemy_pawn_jumped_two, location: 'd4', from_location: 'd2')]))
         allow(game_allowed).to receive(:unit_actions)
       end
 
@@ -459,7 +468,9 @@ describe ChessEngine::Game do
     end
 
     context 'current player is not same as action' do
-      let(:action) { double('action', unit: double('unit', player: white_player)) }
+      let(:other_player_unit) { double('unit', player: white_player) }
+      let(:move) { double('move', unit: other_player_unit) }
+      let(:action) { double('action', moves: [move]) }
 
       before do
         allow(game_perform).to receive(:turn).and_return(10)
@@ -476,8 +487,10 @@ describe ChessEngine::Game do
 
     context 'action is not currently allowed for the unit' do
       let(:unit) { double('unit', player: white_player, location: 'b6', symbol: '♘') }
-      let(:action) { double('action', unit:, location: 'h3') }
-      let(:other_action) { double('action', unit:) }
+      let(:move) { double('move', unit:, location: 'h3') }
+      let(:other_move) { double('move', unit:, location: 'h4') }
+      let(:action) { double('action', moves: [move]) }
+      let(:other_action) { double('action', moves: [other_move]) }
 
       before do
         allow(game_perform).to receive(:turn).and_return(10)
@@ -494,7 +507,7 @@ describe ChessEngine::Game do
 
     context 'action is allowed for the unit' do
       let(:unit) { double('unit', player: white_player, location: 'b6', symbol: '♘') }
-      let(:action) { double('action', unit:, location: 'h3') }
+      let(:action) { double('action', moves: [double('move', unit:, location: 'h3')]) }
 
       before do
         game_perform.instance_variable_set(:@turn, 10)

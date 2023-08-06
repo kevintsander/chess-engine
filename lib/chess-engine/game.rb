@@ -75,7 +75,7 @@ module ChessEngine
 
       unless is_promote_command || allowed_actions(unit).include?(action)
         raise ArgumentError,
-              "unit #{unit.symbol} cannot perform #{action.class.name} at #{action.location}"
+              "unit #{unit.symbol} cannot perform #{action.class.name}"
       end
 
       action.perform_action

@@ -87,7 +87,7 @@ describe ChessEngine::Board do
     end
   end
 
-  describe '#other_castle_unit_move_hash' do
+  describe '#other_castle_unit_move' do
     subject(:board_move_hash) { described_class.new }
     let(:king) { double('king', kingside_start?: true, is_a?: ChessEngine::Units::King, location: 'e8') }
     let(:kingside_rook) { double('rook', kingside_start?: true, is_a?: ChessEngine::Units::Rook, location: 'h8') }
@@ -95,8 +95,9 @@ describe ChessEngine::Board do
     it 'returns the other unit and move location' do
       allow(king).to receive(:allowed_actions_deltas).and_return({ kingside_castle: [[0, 2]] })
       allow(board_move_hash).to receive(:friendly_units).and_yield(king)
-      result = board_move_hash.other_castle_unit_move_hash(kingside_rook, :kingside_castle)
-      expect(result).to eq({ unit: king, move_location: 'g8' })
+      result = board_move_hash.other_castle_unit_move(kingside_rook, :kingside_castle)
+      expect(result.unit).to eq(king)
+      expect(result.location).to eq('g8')
     end
   end
 
