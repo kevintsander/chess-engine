@@ -58,7 +58,7 @@ module ChessEngine
     end
 
     def perform_promote(unit, promoted_unit_class)
-      promote_command = PromoteCommand.new(board, unit, unit.location, promoted_unit_class)
+      promote_command = Actions::PromoteCommand.new(board, unit, unit.location, promoted_unit_class)
       perform_action(promote_command)
     end
 
@@ -70,7 +70,7 @@ module ChessEngine
       unit = move.unit
       raise ArgumentError, 'Only current player can perform action' if unit.player != current_player
 
-      is_promote_command = action.is_a?(ChessEngine::Actions::PromoteCommand)
+      is_promote_command = action.is_a?(Actions::PromoteCommand)
       raise MustPromoteError if last_unit && can_promote_unit?(last_unit) && !is_promote_command
 
       unless is_promote_command || allowed_actions(unit).include?(action)
@@ -79,9 +79,9 @@ module ChessEngine
       end
 
       action.perform_action
-      update_allowed_actions
       # @allowed_actions_cache = {} # reset allowed actions cache
       log_action(action)
+      update_allowed_actions
       return if game_over?
 
       switch_current_player unless can_promote_unit?(unit)

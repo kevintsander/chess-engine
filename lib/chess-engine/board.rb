@@ -81,7 +81,9 @@ module ChessEngine
 
     def other_castle_unit_move(unit, castle_type)
       friendly_units(unit) do |friendly|
-        next if castle_type == :kingside_castle && !friendly.kingside_start?
+        if castle_type == :kingside_castle && !friendly.is_a?(ChessEngine::Units::King) && !friendly.kingside_start?
+          next
+        end
         if castle_type == :queenside_castle && !friendly.is_a?(ChessEngine::Units::King) && !friendly.queenside_start?
           next
         end

@@ -7,13 +7,17 @@ module ChessEngine
     class PromoteCommand < ActionCommand
       def initialize(board, unit, location, promoted_unit_class)
         super(board, unit, location)
+        @board = board
         @promoted_unit_class = promoted_unit_class
       end
 
-      def perform_moves
+      def perform_action
+        move = moves[0]
+        unit = move.unit
+        location = move.location
         unit.promote
         promoted_unit = @promoted_unit_class.new(location, unit.player)
-        board.add_unit(promoted_unit)
+        @board.add_unit(promoted_unit)
       end
     end
   end

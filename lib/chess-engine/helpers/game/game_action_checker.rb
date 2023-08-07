@@ -123,6 +123,7 @@ module ChessEngine
           # cannot be blocked or have an enemy on the move space
           return false if board.enemy_unit_at_location?(unit, move_location) ||
                           board.unit_blocking_move?(unit, move_location, other_unit)
+
           return false if board.enemy_unit_at_location?(other_unit, other_unit_move_location) ||
                           board.unit_blocking_move?(other_unit, other_unit_move_location, unit)
 
@@ -193,7 +194,7 @@ module ChessEngine
         end
 
         def can_promote_unit?(unit)
-          return false unless unit_location = unit.location
+          return false unless (unit_location = unit.location)
           return false unless unit.is_a?(ChessEngine::Units::Pawn)
 
           forward_delta = [0.send(unit.forward, 1), 0]
