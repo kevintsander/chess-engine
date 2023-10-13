@@ -139,7 +139,7 @@ module ChessEngine
         end
 
         def allowed_actions(unit)
-          allowed_actions_cached = @allowed_actions_cache[unit.location]
+          allowed_actions_cached = @allowed_actions_cache[unit.location] #check if there is an action already cached
           unless allowed_actions_cached
             allowed = []
             return allowed unless unit.location

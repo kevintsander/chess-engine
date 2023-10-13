@@ -36,6 +36,7 @@ module ChessEngine
       setup_new_board
       @turn = 1
       @current_player = @players.detect { |player| player.color == :white }
+      update_allowed_actions
     end
 
     def game_over?
@@ -81,10 +82,10 @@ module ChessEngine
       action.perform_action
       # @allowed_actions_cache = {} # reset allowed actions cache
       log_action(action)
-      update_allowed_actions
       return if game_over?
 
       switch_current_player unless can_promote_unit?(unit)
+      update_allowed_actions
       return unless turn_over?
 
       @turn += 1
@@ -133,7 +134,7 @@ module ChessEngine
       valid_units = board.units.select { |u| u.player == current_player && !u.captured }
       valid_units.each do |unit|
         unit_allowed_actions = allowed_actions(unit)
-        @allowed_actions_cache[unit] = unit_allowed_actions if unit_allowed_actions
+        # @allowed_actions_cache[unit] = unit_allowed_actions if unit_allowed_actions
       end
     end
 
