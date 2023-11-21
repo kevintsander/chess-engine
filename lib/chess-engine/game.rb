@@ -15,7 +15,7 @@ module ChessEngine
     include Helpers::Game::GameActionChecker
     include Helpers::Game::GameStatusChecker
 
-    attr_reader :board, :game_log, :players, :turn, :current_player, :player_draw
+    attr_reader :board, :game_log, :players, :turn, :current_player, :player_draw, :allowed_actions_cache
 
     @current_player = nil
     @turn = 0
@@ -36,7 +36,7 @@ module ChessEngine
       setup_new_board
       @turn = 1
       @current_player = @players.detect { |player| player.color == :white }
-      update_allowed_actions
+      @allowed_actions_cache = {}
     end
 
     def game_over?
@@ -80,12 +80,11 @@ module ChessEngine
       end
 
       action.perform_action
-      # @allowed_actions_cache = {} # reset allowed actions cache
       log_action(action)
       return if game_over?
 
       switch_current_player unless can_promote_unit?(unit)
-      update_allowed_actions
+      @allowed_actions_cache = {}
       return unless turn_over?
 
       @turn += 1
@@ -127,16 +126,6 @@ module ChessEngine
     end
 
     private
-
-    def update_allowed_actions
-      @allowed_actions_cache = {}
-      # non-captured friendly units
-      valid_units = board.units.select { |u| u.player == current_player && !u.captured }
-      valid_units.each do |unit|
-        unit_allowed_actions = allowed_actions(unit)
-        # @allowed_actions_cache[unit] = unit_allowed_actions if unit_allowed_actions
-      end
-    end
 
     def switch_current_player
       @current_player = other_player(current_player)

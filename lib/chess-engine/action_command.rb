@@ -19,5 +19,9 @@ module ChessEngine
       end
       capture_unit&.capture
     end
+
+    def ==(other)
+      other.moves.difference(moves).none? && other.location_notation == location_notation && other.capture_unit == capture_unit
+    end
   end
 end
