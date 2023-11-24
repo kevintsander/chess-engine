@@ -84,10 +84,17 @@ module ChessEngine
       return if game_over?
 
       switch_current_player unless can_promote_unit?(unit)
-      @allowed_actions_cache = {}
+      update_allowed_actions_cache
       return unless turn_over?
 
       @turn += 1
+    end
+
+    def update_allowed_actions_cache
+      @allowed_actions_cache = {}
+      board.units.select(&:location).each do |unit|
+        allowed_actions(unit)
+      end
     end
 
     def new_game_units
