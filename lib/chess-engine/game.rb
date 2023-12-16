@@ -15,7 +15,7 @@ module ChessEngine
     include Helpers::Game::GameActionChecker
     include Helpers::Game::GameStatusChecker
 
-    attr_reader :board, :game_log, :players, :turn, :current_player, :status
+    attr_reader :board, :game_log, :players, :turn, :current_player, :allowed_actions, :status
 
     @current_player = nil
     @turn = 0
