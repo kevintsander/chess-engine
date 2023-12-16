@@ -193,11 +193,11 @@ module ChessEngine
           new_test_game.check?(test_friendly_king)
         end
 
-        def can_promote_unit?(unit)
-          return false unless (unit_location = unit.location)
-          return false unless unit.is_a?(ChessEngine::Units::Pawn)
+        def can_promote_last_unit?
+          return false unless last_unit && unit_location = last_unit.location
+          return false unless last_unit.is_a?(ChessEngine::Units::Pawn)
 
-          forward_delta = [0.send(unit.forward, 1), 0]
+          forward_delta = [0.send(last_unit.forward, 1), 0]
           test_forward_location = board.delta_location(unit_location, forward_delta)
 
           test_forward_location ? false : true

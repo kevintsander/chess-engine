@@ -4,20 +4,26 @@ require_relative '../action_command'
 
 module ChessEngine
   module Actions
-    class PromoteCommand < ActionCommand
-      def initialize(board, unit, location, promoted_unit_class)
-        super(board, unit, location)
+    class PromoteCommand
+      attr_reader :unit, :promoted_unit_class
+
+      def initialize(board, unit, promoted_unit_class)
+        @unit = unit
         @board = board
         @promoted_unit_class = promoted_unit_class
       end
 
-      def perform_action
-        move = moves[0]
-        unit = move.unit
-        location = move.location
+      def perform_action(board)
+        location = unit.location
+        promoted_unit = @promoted_unit_class.new(location)
+
         unit.promote
-        promoted_unit = @promoted_unit_class.new(location, unit.player)
-        @board.add_unit(promoted_unit)
+        board.add_unit(promoted_unit)
+      end
+
+      def ==(other)
+        other.unit == unit && other.promoted_unit_class = promoted_unit_class
+        other.moves.difference(moves).none? && other.location_notation == location_notation && other.capture_unit == capture_unit
       end
     end
   end

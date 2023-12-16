@@ -15,7 +15,7 @@ module ChessEngine
     include Helpers::Game::GameActionChecker
     include Helpers::Game::GameStatusChecker
 
-    attr_reader :board, :game_log, :players, :turn, :current_player, :player_draw, :allowed_actions_cache
+    attr_reader :board, :game_log, :players, :turn, :current_player, :allowed_actions_cache, :status
 
     @current_player = nil
     @turn = 0
@@ -26,6 +26,7 @@ module ChessEngine
       @game_log = []
       @board = Board.new
       @allowed_actions_cache = {}
+      @status = :initialized
     end
 
     def add_players(players)
@@ -37,14 +38,13 @@ module ChessEngine
       @turn = 1
       @current_player = @players.detect { |player| player.color == :white }
       @allowed_actions_cache = {}
-    end
-
-    def game_over?
-      turn&.positive? && (player_draw || fifty_turn_draw? || any_stalemate? || any_checkmate?)
+      @status = :playing
     end
 
     def submit_draw
-      @player_draw = true
+      return unless %i[playing check].include?(status)
+
+      @status = :player_draw
     end
 
     def both_players_played?
@@ -54,46 +54,77 @@ module ChessEngine
       player1_played && player2_played
     end
 
-    def turn_over?
-      both_players_played? && !can_promote_unit?(last_unit)
-    end
-
-    def perform_promote(unit, promoted_unit_class)
-      promote_command = Actions::PromoteCommand.new(board, unit, unit.location, promoted_unit_class)
-      perform_action(promote_command)
-    end
-
     def perform_action(action)
-      raise GameNotStartedError if turn.zero?
-      raise GameAlreadyOverError if game_over?
+      case @status
+      when :initialized
+        raise GameNotStartedError
+      when :playing, :check
+        raise MustPerformActionError unless action.is_a?(Actions::ActionCommand)
 
-      move = action.moves[0]
-      unit = move.unit
-      raise ArgumentError, 'Only current player can perform action' if unit.player != current_player
+        unit = action.moves[0].unit
+        unless allowed_actions(unit).include?(action)
+          raise ArgumentError,
+                "unit #{unit.symbol} cannot perform #{action.class.name}"
+        end
 
-      is_promote_command = action.is_a?(Actions::PromoteCommand)
-      raise MustPromoteError if last_unit && can_promote_unit?(last_unit) && !is_promote_command
+        action.perform_action
+        log_action(action)
 
-      unless is_promote_command || allowed_actions(unit).include?(action)
-        raise ArgumentError,
-              "unit #{unit.symbol} cannot perform #{action.class.name}"
+        # set next state
+        @status = if any_check?
+                    :check
+                  elsif can_promote_last_unit?
+                    :promoting
+                  elsif fifty_turn_draw?
+                    :max_turn_draw
+                  elsif any_stalemate?
+                    :stalemate
+                  elsif any_checkmate?
+                    :checkmate
+                  else
+                    :playing
+                  end
+
+        if %i[playing check].include?(@status)
+          @turn += 1 if both_players_played?
+          switch_current_player
+          set_allowed_actions
+        end
+
+      when :promoting
+        raise MustPromoteError unless action.is_a?(Actions::PromoteCommand)
+
+        unless allowed_actions(:promote).include?(action)
+          raise ArgumentError,
+                "unit #{unit.symbol} cannot perform #{action.class.name}"
+        end
+
+        action.perform_action(board)
+
+      when :checkmate, :stalemate, :player_draw, :max_turn_draw
+        raise GameAlreadyOverError
       end
-
-      action.perform_action
-      log_action(action)
-      return if game_over?
-
-      switch_current_player unless can_promote_unit?(unit)
-      update_allowed_actions_cache
-      return unless turn_over?
-
-      @turn += 1
     end
 
-    def update_allowed_actions_cache
+    def game_over?
+      %i[player_draw max_turn_draw stalemate checkmate].include?(status)
+    end
+
+    def set_allowed_actions
       @allowed_actions_cache = {}
-      board.units.select(&:location).each do |unit|
-        allowed_actions(unit)
+      if status == :promoting
+        allowed_promotions = []
+
+        allowed_promotions << Actions::PromoteCommand.new(board, last_unit, Units::Queen)
+        allowed_promotions << Actions::PromoteCommand.new(board, last_unit, Units::Bishop)
+        allowed_promotions << Actions::PromoteCommand.new(board, last_unit, Units::Rook)
+        allowed_promotions << Actions::PromoteCommand.new(board, last_unit, Units::Knight)
+
+        allowed_actions_cache[:promotions] = allowed_promotions
+      else
+        board.units.select { |u| u.player == current_player }.select(&:location).each do |unit|
+          allowed_actions(unit)
+        end
       end
     end
 
@@ -129,7 +160,11 @@ module ChessEngine
     end
 
     def select_allowed_action(unit, move_location)
-      allowed_actions(unit).detect { |action| action.location_notation == move_location }
+      @allowed_actions_cache[unit.location].detect { |action| action.location_notation == move_location }
+    end
+
+    def select_promote_action(promoted_unit_class)
+      @allowed_actions_cache[:promotions].detect { |p| p.promoted_unit_class == promoted_unit_class }
     end
 
     private

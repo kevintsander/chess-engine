@@ -409,16 +409,17 @@ describe ChessEngine::Game do
     end
   end
 
-  describe '#can_promote_unit?' do
+  describe '#can_promote_last_unit?' do
     subject(:game_can_promote) { blank_game }
     let(:board_can_promote) { double('board') }
 
     context 'pawn is on last space' do
       it 'returns true' do
         promotable_pawn = ChessEngine::Units::Pawn.new('b1', black_player)
+        allow(game_can_promote).to receive(:last_unit).and_return(promotable_pawn)
         allow(board_can_promote).to receive(:delta_location).with('b1', [-1, 0]).and_return(nil)
         allow(game_can_promote).to receive(:board).and_return(board_can_promote)
-        expect(game_can_promote).to be_can_promote_unit(promotable_pawn)
+        expect(game_can_promote).to be_can_promote_last_unit
       end
     end
 
@@ -427,7 +428,7 @@ describe ChessEngine::Game do
         promotable_pawn = ChessEngine::Units::Pawn.new('b2', black_player)
         allow(board_can_promote).to receive(:delta_location).with('b2', [-1, 0]).and_return('b1')
         allow(game_can_promote).to receive(:board).and_return(board_can_promote)
-        expect(game_can_promote).not_to be_can_promote_unit(promotable_pawn)
+        expect(game_can_promote).not_to be_can_promote_last_unit
       end
     end
   end
@@ -439,10 +440,7 @@ describe ChessEngine::Game do
       let(:action) { double('action', unit: double('unit', player: white_player)) }
 
       before do
-        allow(game_perform).to receive(:turn).and_return(0)
-        allow(game_perform).to receive(:current_player).and_return(white_player)
-        allow(game_perform).to receive(:game_over?).and_return(false)
-        allow(game_perform).to receive(:can_promote_unit?).and_return(false)
+        game_perform.instance_variable_set(:@status, :initialized)
         allow(game_perform).to receive(:allowed_actions).and_return(action)
       end
 
@@ -452,36 +450,18 @@ describe ChessEngine::Game do
     end
 
     context 'game is already over' do
-      let(:action) { double('action', unit: double('unit', player: white_player)) }
+      let(:action) do
+        double('action', unit: double('unit', player: white_player))
+      end
 
       before do
-        allow(game_perform).to receive(:turn).and_return(10)
-        allow(game_perform).to receive(:current_player).and_return(white_player)
-        allow(game_perform).to receive(:game_over?).and_return(true)
-        allow(game_perform).to receive(:can_promote_unit?).and_return(false)
+        allow(action).to receive(:is_a?).with(ChessEngine::Actions::ActionCommand).and_return(true)
+        game_perform.instance_variable_set(:@status, :checkmate)
         allow(game_perform).to receive(:allowed_actions).and_return(action)
       end
 
       it 'raises error' do
         expect { game_perform.perform_action(action) }.to raise_error(described_class::GameAlreadyOverError)
-      end
-    end
-
-    context 'current player is not same as action' do
-      let(:other_player_unit) { double('unit', player: white_player) }
-      let(:move) { double('move', unit: other_player_unit) }
-      let(:action) { double('action', moves: [move]) }
-
-      before do
-        allow(game_perform).to receive(:turn).and_return(10)
-        allow(game_perform).to receive(:current_player).and_return(black_player)
-        allow(game_perform).to receive(:game_over?).and_return(false)
-        allow(game_perform).to receive(:can_promote_unit?).and_return(false)
-        allow(game_perform).to receive(:allowed_actions).and_return(action)
-      end
-
-      it 'raises error' do
-        expect { game_perform.perform_action(action) }.to raise_error(ArgumentError)
       end
     end
 
@@ -493,10 +473,8 @@ describe ChessEngine::Game do
       let(:other_action) { double('action', moves: [other_move]) }
 
       before do
-        allow(game_perform).to receive(:turn).and_return(10)
-        allow(game_perform).to receive(:current_player).and_return(white_player)
-        allow(game_perform).to receive(:game_over?).and_return(false)
-        allow(game_perform).to receive(:can_promote_unit?).and_return(false)
+        allow(action).to receive(:is_a?).with(ChessEngine::Actions::ActionCommand).and_return(true)
+        game_perform.instance_variable_set(:@status, :playing)
         allow(game_perform).to receive(:allowed_actions).and_return([other_action])
       end
 
@@ -510,13 +488,12 @@ describe ChessEngine::Game do
       let(:action) { double('action', moves: [double('move', unit:, location: 'h3')]) }
 
       before do
+        allow(action).to receive(:perform_action)
+        allow(action).to receive(:is_a?).with(ChessEngine::Actions::ActionCommand).and_return(true)
+        game_perform.instance_variable_set(:@status, :playing)
+        allow(game_perform).to receive(:allowed_actions).and_return([action])
         game_perform.instance_variable_set(:@turn, 10)
         game_perform.instance_variable_set(:@current_player, white_player)
-        allow(action).to receive(:perform_action)
-        allow(game_perform).to receive(:game_over?).and_return(false)
-        allow(game_perform).to receive(:turn_over?).and_return(false)
-        allow(game_perform).to receive(:can_promote_unit?).and_return(false)
-        allow(game_perform).to receive(:allowed_actions).and_return([action])
       end
 
       it 'sends perform_action to action and switches the player' do
@@ -529,22 +506,21 @@ describe ChessEngine::Game do
         it 'does not switch players' do
           other_unit = double('other_unit')
           allow(game_perform).to receive(:last_unit).and_return(other_unit)
-          allow(game_perform).to receive(:can_promote_unit?).with(other_unit).and_return(false)
-          allow(game_perform).to receive(:can_promote_unit?).with(unit).and_return(true)
+          allow(game_perform).to receive(:can_promote_last_unit?).and_return(true)
           expect { game_perform.perform_action(action) }.not_to(change { game_perform.current_player })
         end
       end
 
-      context 'unit cannot be promoted' do
+      context 'unit cannot be promoted and not end of game' do
         it 'switches players' do
-          allow(game_perform).to receive(:can_promote_unit?).and_return(false)
+          allow(game_perform).to receive(:can_promote_last_unit?).and_return(false)
           expect { game_perform.perform_action(action) }.to change { game_perform.current_player }.to(black_player)
         end
       end
 
       context 'turn is over' do
         before do
-          allow(game_perform).to receive(:turn_over?).and_return(true)
+          allow(game_perform).to receive(:both_players_played?).and_return(true)
         end
 
         it 'increments the turn' do
@@ -555,7 +531,7 @@ describe ChessEngine::Game do
 
       context 'turn is not over' do
         before do
-          allow(game_perform).to receive(:turn_over?).and_return(false)
+          allow(game_perform).to receive(:both_players_played?).and_return(false)
         end
 
         it 'does not increment the turn' do
