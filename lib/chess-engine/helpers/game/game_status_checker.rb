@@ -9,13 +9,13 @@ module ChessEngine
         end
 
         def checkmate?(king)
-          king.is_a?(ChessEngine::Units::King) && check?(king) && !friendly_units_have_moves(king) && allowed_actions(king).none?
+          king.is_a?(ChessEngine::Units::King) && check?(king) && !friendly_units_have_moves(king) && unit_allowed_actions(king).none?
         end
 
         def friendly_units_have_moves(unit)
           board.friendly_units(unit).any? do |friendly|
-            allowed_actions = allowed_actions(friendly)
-            allowed_actions&.any?
+            unit_allowed_actions = unit_allowed_actions(friendly)
+            unit_allowed_actions&.any?
           end
         end
 
@@ -28,7 +28,7 @@ module ChessEngine
         end
 
         def stalemate?(king)
-          king.is_a?(ChessEngine::Units::King) && !check?(king) && !friendly_units_have_moves(king) && allowed_actions(king).none?
+          king.is_a?(ChessEngine::Units::King) && !check?(king) && !friendly_units_have_moves(king) && unit_allowed_actions(king).none?
         end
 
         def any_stalemate?

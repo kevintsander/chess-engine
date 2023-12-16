@@ -15,7 +15,7 @@ module ChessEngine
     include Helpers::Game::GameActionChecker
     include Helpers::Game::GameStatusChecker
 
-    attr_reader :board, :game_log, :players, :turn, :current_player, :allowed_actions_cache, :status
+    attr_reader :board, :game_log, :players, :turn, :current_player, :status
 
     @current_player = nil
     @turn = 0
@@ -25,7 +25,7 @@ module ChessEngine
       @players = players
       @game_log = []
       @board = Board.new
-      @allowed_actions_cache = {}
+      @allowed_actions = {}
       @status = :initialized
     end
 
@@ -37,8 +37,8 @@ module ChessEngine
       setup_new_board
       @turn = 1
       @current_player = @players.detect { |player| player.color == :white }
-      @allowed_actions_cache = {}
       @status = :playing
+      set_allowed_actions
     end
 
     def submit_draw
@@ -62,7 +62,7 @@ module ChessEngine
         raise MustPerformActionError unless action.is_a?(Actions::ActionCommand)
 
         unit = action.moves[0].unit
-        unless allowed_actions(unit).include?(action)
+        unless unit_allowed_actions(unit).include?(action)
           raise ArgumentError,
                 "unit #{unit.symbol} cannot perform #{action.class.name}"
         end
@@ -94,7 +94,7 @@ module ChessEngine
       when :promoting
         raise MustPromoteError unless action.is_a?(Actions::PromoteCommand)
 
-        unless allowed_actions(:promote).include?(action)
+        unless @allowed_actions[:promote].include?(action)
           raise ArgumentError,
                 "unit #{unit.symbol} cannot perform #{action.class.name}"
         end
@@ -111,7 +111,7 @@ module ChessEngine
     end
 
     def set_allowed_actions
-      @allowed_actions_cache = {}
+      @allowed_actions = {}
       if status == :promoting
         allowed_promotions = []
 
@@ -120,10 +120,10 @@ module ChessEngine
         allowed_promotions << Actions::PromoteCommand.new(board, last_unit, Units::Rook)
         allowed_promotions << Actions::PromoteCommand.new(board, last_unit, Units::Knight)
 
-        allowed_actions_cache[:promotions] = allowed_promotions
+        @allowed_actions[:promotions] = allowed_promotions
       else
         board.units.select { |u| u.player == current_player }.select(&:location).each do |unit|
-          allowed_actions(unit)
+          @allowed_actions[unit.location] = unit_allowed_actions(unit)
         end
       end
     end
@@ -160,11 +160,11 @@ module ChessEngine
     end
 
     def select_allowed_action(unit, move_location)
-      @allowed_actions_cache[unit.location].detect { |action| action.location_notation == move_location }
+      unit_allowed_actions(unit).detect { |action| action.location_notation == move_location }
     end
 
     def select_promote_action(promoted_unit_class)
-      @allowed_actions_cache[:promotions].detect { |p| p.promoted_unit_class == promoted_unit_class }
+      @allowed_actions[:promotions]&.detect { |p| p.promoted_unit_class == promoted_unit_class }
     end
 
     private

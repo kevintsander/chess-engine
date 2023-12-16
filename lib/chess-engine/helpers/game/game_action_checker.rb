@@ -138,36 +138,35 @@ module ChessEngine
           true
         end
 
-        def allowed_actions(unit)
-          allowed_actions_cached = @allowed_actions_cache[unit.location] # check if there is an action already cached
-          unless allowed_actions_cached
-            allowed = []
-            return allowed unless unit.location
+        def unit_allowed_actions(unit)
+          cached_actions = @allowed_actions[unit.location]
+          return cached_actions if cached_actions
 
-            unit.allowed_actions_deltas.each do |(action_type, deltas)|
-              action_map = actions_map[action_type]
-              deltas.each do |delta|
-                move_location = board.delta_location(unit.location, delta)
-                next unless move_location
+          allowed = []
+          return allowed unless unit.location
 
-                action_class = action_map[:class]
-                action = action_class.new(board, unit, move_location)
+          unit.allowed_actions_deltas.each do |(action_type, deltas)|
+            action_map = actions_map[action_type]
+            deltas.each do |delta|
+              move_location = board.delta_location(unit.location, delta)
+              next unless move_location
 
-                next unless action_map[:validator].call(action)
-                next if action_would_cause_check?(action)
+              action_class = action_map[:class]
+              action = action_class.new(board, unit, move_location)
 
-                allowed << action
-              end
+              next unless action_map[:validator].call(action)
+              next if action_would_cause_check?(action)
+
+              allowed << action
             end
-            @allowed_actions_cache[unit.location] = allowed
           end
-          @allowed_actions_cache[unit.location]
+          allowed
         end
 
         def units_with_actions(player)
           board.units.select do |unit|
-            allowed_actions = allowed_actions(unit)
-            unit.player == player && allowed_actions && allowed_actions.any?
+            unit_allowed_actions = unit_allowed_actions(unit)
+            unit.player == player && unit_allowed_actions && unit_allowed_actions.any?
           end
         end
 

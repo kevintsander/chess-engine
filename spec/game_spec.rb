@@ -13,7 +13,7 @@ describe ChessEngine::Game do
     blank_game.instance_variable_set(:@game_log, [])
   end
 
-  describe '#allowed_actions' do
+  describe '#unit_allowed_actions' do
     subject(:game_allowed) { blank_game }
     let(:board_allowed) { ChessEngine::Board.new }
 
@@ -39,13 +39,13 @@ describe ChessEngine::Game do
         knight_unit = ChessEngine::Units::Knight.new('e5', black_player)
         king_unit = ChessEngine::Units::King.new('f6', white_player)
         board_allowed.add_unit(pawn_unit)
-        pawn_result = game_allowed.allowed_actions(pawn_unit)
-        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
+        pawn_result = game_allowed.unit_allowed_actions(pawn_unit)
+        game_allowed.instance_variable_set(:@allowed_actions, {})
         board_allowed.clear_units.add_unit(knight_unit)
-        knight_result = game_allowed.allowed_actions(knight_unit)
-        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
+        knight_result = game_allowed.unit_allowed_actions(knight_unit)
+        game_allowed.instance_variable_set(:@allowed_actions, {})
         board_allowed.clear_units.add_unit(king_unit)
-        king_result = game_allowed.allowed_actions(king_unit)
+        king_result = game_allowed.unit_allowed_actions(king_unit)
 
         expect(pawn_result).to match_locations(%w[c3 c4], ChessEngine::Actions::NormalMoveCommand)
         expect(knight_result).to match_locations(%w[g4 f3 g6 f7 d7 c6 c4 d3], ChessEngine::Actions::NormalMoveCommand)
@@ -63,22 +63,22 @@ describe ChessEngine::Game do
         king_unit = ChessEngine::Units::King.new('h8', white_player)
 
         board_allowed.add_unit(pawn_unit)
-        pawn_result = game_allowed.allowed_actions(pawn_unit)
-        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
+        pawn_result = game_allowed.unit_allowed_actions(pawn_unit)
+        game_allowed.instance_variable_set(:@allowed_actions, {})
         board_allowed.clear_units.add_unit(rook_unit)
-        rook_result = game_allowed.allowed_actions(rook_unit)
-        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
+        rook_result = game_allowed.unit_allowed_actions(rook_unit)
+        game_allowed.instance_variable_set(:@allowed_actions, {})
         board_allowed.clear_units.add_unit(knight_unit)
-        knight_result = game_allowed.allowed_actions(knight_unit)
-        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
+        knight_result = game_allowed.unit_allowed_actions(knight_unit)
+        game_allowed.instance_variable_set(:@allowed_actions, {})
         board_allowed.clear_units.add_unit(bishop_unit)
-        bishop_result = game_allowed.allowed_actions(bishop_unit)
-        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
+        bishop_result = game_allowed.unit_allowed_actions(bishop_unit)
+        game_allowed.instance_variable_set(:@allowed_actions, {})
         board_allowed.clear_units.add_unit(queen_unit)
-        queen_result = game_allowed.allowed_actions(queen_unit)
-        game_allowed.instance_variable_set(:@allowed_actions_cache, {})
+        queen_result = game_allowed.unit_allowed_actions(queen_unit)
+        game_allowed.instance_variable_set(:@allowed_actions, {})
         board_allowed.clear_units.add_unit(king_unit)
-        king_result = game_allowed.allowed_actions(king_unit)
+        king_result = game_allowed.unit_allowed_actions(king_unit)
 
         expect(pawn_result).to be_empty
         expect(rook_result).to match_locations(%w[c1 c2 c4 c5 c6 c7 c8 a3 b3 d3 e3 f3 g3 h3],
@@ -101,9 +101,9 @@ describe ChessEngine::Game do
 
         allow(board_allowed).to receive(:units).and_return([blocking_pawn, bishop_unit, rook_unit, queen_unit])
 
-        bishop_result = game_allowed.allowed_actions(bishop_unit)
-        rook_result = game_allowed.allowed_actions(rook_unit)
-        queen_result = game_allowed.allowed_actions(queen_unit)
+        bishop_result = game_allowed.unit_allowed_actions(bishop_unit)
+        rook_result = game_allowed.unit_allowed_actions(rook_unit)
+        queen_result = game_allowed.unit_allowed_actions(queen_unit)
 
         expect(bishop_result).to match_locations(%w[b7 a8 b5 a4 d5 d7 e8], ChessEngine::Actions::NormalMoveCommand)
         expect(rook_result).to match_locations(%w[e7 e8 d6 e5 f6 g6 h6], ChessEngine::Actions::NormalMoveCommand)
@@ -122,8 +122,8 @@ describe ChessEngine::Game do
 
         allow(board_allowed).to receive(:units).and_return([queen, enemy_queen, enemy_knight, enemy_pawn, enemy_bishop])
 
-        queen_result = game_allowed.allowed_actions(queen)
-        enemy_knight_result = game_allowed.allowed_actions(enemy_knight)
+        queen_result = game_allowed.unit_allowed_actions(queen)
+        enemy_knight_result = game_allowed.unit_allowed_actions(enemy_knight)
 
         expect(queen_result).to match_locations(%w[f1 f8 d4], ChessEngine::Actions::AttackMoveCommand)
         expect(enemy_knight_result).to match_locations(%w[f6], ChessEngine::Actions::AttackMoveCommand)
@@ -139,8 +139,8 @@ describe ChessEngine::Game do
 
         allow(board_allowed).to receive(:units).and_return([white_rook, white_pawn, black_rook, black_bishop])
 
-        white_rook_result = game_allowed.allowed_actions(white_rook)
-        black_rook_result = game_allowed.allowed_actions(black_rook)
+        white_rook_result = game_allowed.unit_allowed_actions(white_rook)
+        black_rook_result = game_allowed.unit_allowed_actions(black_rook)
 
         expect(white_rook_result).to match_locations(%w[c1], ChessEngine::Actions::AttackMoveCommand)
         expect(black_rook_result).to match_locations(%w[a2], ChessEngine::Actions::AttackMoveCommand)
@@ -160,14 +160,14 @@ describe ChessEngine::Game do
       it 'adjacent pawn can en passant' do
         adjacent_pawn = ChessEngine::Units::Pawn.new('e4', black_player)
         board_allowed.add_unit(enemy_pawn_jumped_two, adjacent_pawn)
-        adjacent_pawn_result = game_allowed.allowed_actions(adjacent_pawn)
+        adjacent_pawn_result = game_allowed.unit_allowed_actions(adjacent_pawn)
         expect(adjacent_pawn_result).to match_locations(['d3'], ChessEngine::Actions::EnPassantCommand)
       end
 
       it 'non-adjacent pawn cannot en passant' do
         non_adjacent_pawn = ChessEngine::Units::Pawn.new('f4', black_player)
         board_allowed.add_unit(enemy_pawn_jumped_two, non_adjacent_pawn)
-        non_adjacent_pawn_result = game_allowed.allowed_actions(non_adjacent_pawn)
+        non_adjacent_pawn_result = game_allowed.unit_allowed_actions(non_adjacent_pawn)
         en_passant_move_result = non_adjacent_pawn_result.detect do |action|
           action.is_a?(ChessEngine::Actions::EnPassantCommand)
         end
@@ -185,7 +185,7 @@ describe ChessEngine::Game do
 
       it 'allowed to double move' do
         board_allowed.add_unit(new_pawn)
-        result = game_allowed.allowed_actions(new_pawn)
+        result = game_allowed.unit_allowed_actions(new_pawn)
         expect(result).to match_locations(%w[h5 h6], ChessEngine::Actions::NormalMoveCommand)
       end
     end
@@ -201,7 +201,7 @@ describe ChessEngine::Game do
 
       it 'not allowed to double move' do
         board_allowed.add_unit(moved_pawn)
-        result = game_allowed.allowed_actions(moved_pawn)
+        result = game_allowed.unit_allowed_actions(moved_pawn)
         expect(result).not_to match_locations(['h4'], ChessEngine::Actions::NormalMoveCommand)
       end
     end
@@ -213,7 +213,7 @@ describe ChessEngine::Game do
 
       it 'not allowed to double move' do
         allow(board_allowed).to receive(:units).and_return([new_pawn, blocking_friendly])
-        blocking_friendly_result = game_allowed.allowed_actions(new_pawn)
+        blocking_friendly_result = game_allowed.unit_allowed_actions(new_pawn)
 
         expect(blocking_friendly_result).not_to match_locations(['h5'], ChessEngine::Actions::NormalMoveCommand)
       end
@@ -235,12 +235,12 @@ describe ChessEngine::Game do
       end
 
       it 'can castle' do
-        white_king_result = game_allowed.allowed_actions(white_king)
-        white_queenside_rook_result = game_allowed.allowed_actions(white_queenside_rook)
-        white_kingside_rook_result = game_allowed.allowed_actions(white_kingside_rook)
-        black_king_reuslt = game_allowed.allowed_actions(black_king)
-        black_queenside_king_result = game_allowed.allowed_actions(black_queenside_rook)
-        black_kingside_rook_result = game_allowed.allowed_actions(black_kingside_rook)
+        white_king_result = game_allowed.unit_allowed_actions(white_king)
+        white_queenside_rook_result = game_allowed.unit_allowed_actions(white_queenside_rook)
+        white_kingside_rook_result = game_allowed.unit_allowed_actions(white_kingside_rook)
+        black_king_reuslt = game_allowed.unit_allowed_actions(black_king)
+        black_queenside_king_result = game_allowed.unit_allowed_actions(black_queenside_rook)
+        black_kingside_rook_result = game_allowed.unit_allowed_actions(black_kingside_rook)
 
         expect(white_king_result).to match_locations(['c1'], ChessEngine::Actions::QueensideCastleCommand)
       end
@@ -259,9 +259,9 @@ describe ChessEngine::Game do
       end
 
       it 'cannot castle' do
-        black_queenside_rook_result = game_allowed.allowed_actions(black_queenside_rook)
-        black_kingside_rook_result = game_allowed.allowed_actions(black_kingside_rook)
-        black_king_result = game_allowed.allowed_actions(black_king)
+        black_queenside_rook_result = game_allowed.unit_allowed_actions(black_queenside_rook)
+        black_kingside_rook_result = game_allowed.unit_allowed_actions(black_kingside_rook)
+        black_king_result = game_allowed.unit_allowed_actions(black_king)
 
         expect(black_queenside_rook_result).not_to match_locations(['d8'], ChessEngine::Actions::QueensideCastleCommand)
         expect(black_kingside_rook_result).not_to match_locations(['f8'], ChessEngine::Actions::KingsideCastleCommand)
@@ -283,9 +283,9 @@ describe ChessEngine::Game do
       end
 
       it 'cannot castle' do
-        queenside_rook_result = game_allowed.allowed_actions(white_queenside_rook)
-        kingside_rook_result = game_allowed.allowed_actions(white_kingside_rook)
-        king_result = game_allowed.allowed_actions(white_king)
+        queenside_rook_result = game_allowed.unit_allowed_actions(white_queenside_rook)
+        kingside_rook_result = game_allowed.unit_allowed_actions(white_kingside_rook)
+        king_result = game_allowed.unit_allowed_actions(white_king)
 
         expect(queenside_rook_result).not_to match_locations(['d1'], ChessEngine::Actions::QueensideCastleCommand)
         expect(kingside_rook_result).not_to match_locations(['f1'], ChessEngine::Actions::KingsideCastleCommand)
@@ -305,9 +305,9 @@ describe ChessEngine::Game do
       end
 
       it 'cannot castle' do
-        queenside_rook_result = game_allowed.allowed_actions(queenside_rook)
-        kingside_rook_result = game_allowed.allowed_actions(kingside_rook)
-        king_result = game_allowed.allowed_actions(king)
+        queenside_rook_result = game_allowed.unit_allowed_actions(queenside_rook)
+        kingside_rook_result = game_allowed.unit_allowed_actions(kingside_rook)
+        king_result = game_allowed.unit_allowed_actions(king)
 
         expect(queenside_rook_result).not_to match_locations(['d1'], ChessEngine::Actions::QueensideCastleCommand)
         expect(kingside_rook_result).not_to match_locations(['f1'], ChessEngine::Actions::KingsideCastleCommand)
@@ -441,7 +441,7 @@ describe ChessEngine::Game do
 
       before do
         game_perform.instance_variable_set(:@status, :initialized)
-        allow(game_perform).to receive(:allowed_actions).and_return(action)
+        allow(game_perform).to receive(:unit_allowed_actions).and_return(action)
       end
 
       it 'raises error' do
@@ -457,7 +457,7 @@ describe ChessEngine::Game do
       before do
         allow(action).to receive(:is_a?).with(ChessEngine::Actions::ActionCommand).and_return(true)
         game_perform.instance_variable_set(:@status, :checkmate)
-        allow(game_perform).to receive(:allowed_actions).and_return(action)
+        allow(game_perform).to receive(:unit_allowed_actions).and_return(action)
       end
 
       it 'raises error' do
@@ -475,7 +475,7 @@ describe ChessEngine::Game do
       before do
         allow(action).to receive(:is_a?).with(ChessEngine::Actions::ActionCommand).and_return(true)
         game_perform.instance_variable_set(:@status, :playing)
-        allow(game_perform).to receive(:allowed_actions).and_return([other_action])
+        allow(game_perform).to receive(:unit_allowed_actions).and_return([other_action])
       end
 
       it 'raises error' do
@@ -491,7 +491,7 @@ describe ChessEngine::Game do
         allow(action).to receive(:perform_action)
         allow(action).to receive(:is_a?).with(ChessEngine::Actions::ActionCommand).and_return(true)
         game_perform.instance_variable_set(:@status, :playing)
-        allow(game_perform).to receive(:allowed_actions).and_return([action])
+        allow(game_perform).to receive(:unit_allowed_actions).and_return([action])
         game_perform.instance_variable_set(:@turn, 10)
         game_perform.instance_variable_set(:@current_player, white_player)
       end
