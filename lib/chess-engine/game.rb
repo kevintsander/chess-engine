@@ -113,10 +113,8 @@ module ChessEngine
     end
 
     def set_allowed_actions
-      unless %i[playing check].include?(status)
-        @allowed_actions = {}
-        return
-      end
+      @allowed_actions = {}
+      return unless %i[playing check].include?(status)
 
       board.units.select { |u| u.player == current_player }.select(&:location).each do |unit|
         @allowed_actions[unit.location] = unit_allowed_actions(unit)
@@ -124,10 +122,8 @@ module ChessEngine
     end
 
     def set_promote_location
-      unless status == :promoting
-        @promote_location = nil
-        return
-      end
+      @promote_location = nil
+      return unless status == :promoting
 
       @promote_location = last_unit.location
     end
