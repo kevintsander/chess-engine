@@ -504,7 +504,7 @@ describe ChessEngine::Game do
 
       context 'unit can be promoted' do
         it 'does not switch players' do
-          other_unit = double('other_unit')
+          other_unit = double('other_unit', location: 'a8')
           allow(game_perform).to receive(:last_unit).and_return(other_unit)
           allow(game_perform).to receive(:can_promote_last_unit?).and_return(true)
           expect { game_perform.perform_action(action) }.not_to(change { game_perform.current_player })

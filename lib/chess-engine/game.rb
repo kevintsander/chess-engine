@@ -15,7 +15,7 @@ module ChessEngine
     include Helpers::Game::GameActionChecker
     include Helpers::Game::GameStatusChecker
 
-    attr_reader :board, :game_log, :players, :turn, :current_player, :allowed_actions, :status
+    attr_reader :board, :game_log, :players, :turn, :current_player, :allowed_actions, :promote_location, :status
 
     @current_player = nil
     @turn = 0
@@ -26,6 +26,7 @@ module ChessEngine
       @game_log = []
       @board = Board.new
       @allowed_actions = {}
+      @promote_location = nil
       @status = :initialized
     end
 
@@ -88,8 +89,9 @@ module ChessEngine
         if %i[playing check].include?(@status)
           @turn += 1 if both_players_played?
           switch_current_player
-          set_allowed_actions
         end
+        set_allowed_actions
+        set_promote_location
 
       when :promoting
         raise MustPromoteError unless action.is_a?(Actions::PromoteCommand)
@@ -111,21 +113,23 @@ module ChessEngine
     end
 
     def set_allowed_actions
-      @allowed_actions = {}
-      if status == :promoting
-        allowed_promotions = []
-
-        allowed_promotions << Actions::PromoteCommand.new(board, last_unit, Units::Queen)
-        allowed_promotions << Actions::PromoteCommand.new(board, last_unit, Units::Bishop)
-        allowed_promotions << Actions::PromoteCommand.new(board, last_unit, Units::Rook)
-        allowed_promotions << Actions::PromoteCommand.new(board, last_unit, Units::Knight)
-
-        @allowed_actions[:promotions] = allowed_promotions
-      else
-        board.units.select { |u| u.player == current_player }.select(&:location).each do |unit|
-          @allowed_actions[unit.location] = unit_allowed_actions(unit)
-        end
+      unless %i[playing check].include?(status)
+        @allowed_actions = {}
+        return
       end
+
+      board.units.select { |u| u.player == current_player }.select(&:location).each do |unit|
+        @allowed_actions[unit.location] = unit_allowed_actions(unit)
+      end
+    end
+
+    def set_promote_location
+      unless status == :promoting
+        @promote_location = nil
+        return
+      end
+
+      @promote_location = last_unit.location
     end
 
     def new_game_units
@@ -159,12 +163,14 @@ module ChessEngine
       unit
     end
 
-    def select_allowed_action(unit, move_location)
-      unit_allowed_actions(unit).detect { |action| action.location_notation == move_location }
+    def perform_allowed_action(unit, move_location)
+      action = unit_allowed_actions(unit).detect { |action| action.location_notation == move_location }
+      perform_action(action)
     end
 
-    def select_promote_action(promoted_unit_class)
-      @allowed_actions[:promotions]&.detect { |p| p.promoted_unit_class == promoted_unit_class }
+    def perform_promote(promoted_unit_class)
+      promote = Actions::PromoteCommand.new(board, last_unit, promoted_unit_class)
+      perform_action(promote)
     end
 
     private
