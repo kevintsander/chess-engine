@@ -163,14 +163,12 @@ module ChessEngine
       unit
     end
 
-    def perform_allowed_action(unit, move_location)
-      action = unit_allowed_actions(unit).detect { |action| action.location_notation == move_location }
-      perform_action(action)
+    def select_allowed_action(unit, move_location)
+      unit_allowed_actions(unit).detect { |action| action.location_notation == move_location }
     end
 
-    def perform_promote(promoted_unit_class)
-      promote = Actions::PromoteCommand.new(board, last_unit, promoted_unit_class)
-      perform_action(promote)
+    def select_promote_action(promoted_unit_class)
+      Actions::PromoteCommand.new(board, last_unit, promoted_unit_class)
     end
 
     private
