@@ -96,12 +96,28 @@ module ChessEngine
       when :promoting
         raise MustPromoteError unless action.is_a?(Actions::PromoteCommand)
 
-        unless @allowed_actions[:promote].include?(action)
-          raise ArgumentError,
-                "unit #{unit.symbol} cannot perform #{action.class.name}"
-        end
-
         action.perform_action(board)
+        # log_action(action)
+
+        # set next state
+        @status = if any_check?
+                    :check
+                  elsif fifty_turn_draw?
+                    :max_turn_draw
+                  elsif any_stalemate?
+                    :stalemate
+                  elsif any_checkmate?
+                    :checkmate
+                  else
+                    :playing
+                  end
+
+        if %i[playing check].include?(@status)
+          @turn += 1 if both_players_played?
+          switch_current_player
+        end
+        set_allowed_actions
+        set_promote_location
 
       when :checkmate, :stalemate, :player_draw, :max_turn_draw
         raise GameAlreadyOverError

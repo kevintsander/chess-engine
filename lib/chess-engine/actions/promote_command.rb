@@ -15,7 +15,7 @@ module ChessEngine
 
       def perform_action(board)
         location = unit.location
-        promoted_unit = @promoted_unit_class.new(location)
+        promoted_unit = @promoted_unit_class.new(location, unit.player)
 
         unit.promote
         board.add_unit(promoted_unit)
