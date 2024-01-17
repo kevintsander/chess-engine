@@ -6,8 +6,8 @@ require_relative '../unit'
 module ChessEngine
   module Units
     class Rook < Unit
-      def initialize(location, player, id = location)
-        super(location, player, id)
+      def initialize(location, color, id = location)
+        super(location, color, id)
         @allowed_actions_deltas = { normal_move: rook_deltas,
                                     normal_attack: rook_deltas }
         @allowed_actions_deltas[:kingside_castle] = kingside_castle_delta if kingside_start?

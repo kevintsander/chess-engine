@@ -45,7 +45,7 @@ module ChessEngine
       units.select do |unit|
         !unit.off_board? &&
           file(unit.location) == file &&
-          unit.player.color == color &&
+          unit.color == color &&
           unit.instance_of?(unit_class)
       end
     end
@@ -54,7 +54,7 @@ module ChessEngine
       units.select do |unit|
         !unit.off_board? &&
           rank(unit.location) == rank &&
-          unit.player.color == color &&
+          unit.color == color &&
           unit.instance_of?(unit_class)
       end
     end

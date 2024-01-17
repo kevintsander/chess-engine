@@ -163,10 +163,10 @@ module ChessEngine
           allowed
         end
 
-        def units_with_actions(player)
+        def units_with_actions(color)
           board.units.select do |unit|
             unit_allowed_actions = unit_allowed_actions(unit)
-            unit.player == player && unit_allowed_actions && unit_allowed_actions.any?
+            unit.color == color && unit_allowed_actions && unit_allowed_actions.any?
           end
         end
 
@@ -181,7 +181,7 @@ module ChessEngine
           move = action.moves[0]
           test_unit = new_test_game_units.detect { |unit| unit.location == move.from_location }
           test_friendly_king = new_test_game_units.detect do |unit|
-            unit.is_a?(ChessEngine::Units::King) && unit.player == move.unit.player
+            unit.is_a?(ChessEngine::Units::King) && unit.color == move.unit.color
           end
 
           # get a copy of the action to test
@@ -206,7 +206,7 @@ module ChessEngine
 
         # creates a test game
         def get_test_game_copy
-          test = self.class.new(players)
+          test = self.class.new
           test.test_game = true
           test_board_units = board.units.map { |unit| unit.dup }
           test_game_log = game_log.map { |log_item| log_item[:action].dup }

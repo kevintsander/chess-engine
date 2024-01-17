@@ -9,13 +9,13 @@ module ChessEngine
     include Helpers::Unit::UnitSymbolMapper
     include Helpers::LocationRankAndFile
 
-    attr_reader :location, :player, :id, :symbol, :captured, :promoted, :initial_location
+    attr_reader :location, :color, :id, :symbol, :captured, :promoted, :initial_location
 
-    def initialize(location, player, id = location)
+    def initialize(location, color, id = location)
       @location = location
-      @player = player
+      @color = color
       @id = id
-      @symbol = get_color_symbol(player.color)
+      @symbol = get_color_symbol(color)
       @initial_location = location
       @captured = false
       @promoted = false
@@ -45,11 +45,11 @@ module ChessEngine
     end
 
     def enemy?(other_unit)
-      other_unit && player != other_unit.player
+      other_unit && color != other_unit.color
     end
 
     def friendly?(other_unit)
-      other_unit && self != other_unit && player == other_unit.player
+      other_unit && self != other_unit && color == other_unit.color
     end
 
     def queenside_start?
@@ -62,7 +62,7 @@ module ChessEngine
 
     # Gets forward location based on initial location, to be used by constructor
     def forward
-      case player.color
+      case color
       when :white
         :+
       when :black
@@ -72,7 +72,7 @@ module ChessEngine
 
     def encode_with(coder)
       coder['location'] = location
-      coder['player'] = player
+      coder['color'] = color
       coder['id'] = id
       coder['symbol'] = symbol
       coder['initial_location'] = @initial_location

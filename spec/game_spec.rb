@@ -3,10 +3,8 @@
 require_relative '../lib/chess-engine/game'
 
 describe ChessEngine::Game do
-  let(:white_player) { double('white_player', color: :white) }
-  let(:black_player) { double('black_player', color: :black) }
   let(:blank_board) { double('board', units: []) }
-  subject(:blank_game) { described_class.new([white_player, black_player]) }
+  subject(:blank_game) { described_class.new }
 
   before do
     blank_game.instance_variable_set(:@board, blank_board)
@@ -35,9 +33,9 @@ describe ChessEngine::Game do
 
     context 'moves inside boundary' do
       it 'returns all moves' do
-        pawn_unit = ChessEngine::Units::Pawn.new('c2', white_player)
-        knight_unit = ChessEngine::Units::Knight.new('e5', black_player)
-        king_unit = ChessEngine::Units::King.new('f6', white_player)
+        pawn_unit = ChessEngine::Units::Pawn.new('c2', :white)
+        knight_unit = ChessEngine::Units::Knight.new('e5', :black)
+        king_unit = ChessEngine::Units::King.new('f6', :white)
         board_allowed.add_unit(pawn_unit)
         pawn_result = game_allowed.unit_allowed_actions(pawn_unit)
         game_allowed.instance_variable_set(:@allowed_actions, {})
@@ -55,12 +53,12 @@ describe ChessEngine::Game do
 
     context 'moves outside of boundary' do
       it 'limits moves' do
-        pawn_unit = ChessEngine::Units::Pawn.new('c8', white_player)
-        rook_unit = ChessEngine::Units::Rook.new('c3', black_player)
-        knight_unit = ChessEngine::Units::Knight.new('h8', black_player)
-        bishop_unit = ChessEngine::Units::Bishop.new('e2', white_player)
-        queen_unit = ChessEngine::Units::Queen.new('b7', black_player)
-        king_unit = ChessEngine::Units::King.new('h8', white_player)
+        pawn_unit = ChessEngine::Units::Pawn.new('c8', :white)
+        rook_unit = ChessEngine::Units::Rook.new('c3', :black)
+        knight_unit = ChessEngine::Units::Knight.new('h8', :black)
+        bishop_unit = ChessEngine::Units::Bishop.new('e2', :white)
+        queen_unit = ChessEngine::Units::Queen.new('b7', :black)
+        king_unit = ChessEngine::Units::King.new('h8', :white)
 
         board_allowed.add_unit(pawn_unit)
         pawn_result = game_allowed.unit_allowed_actions(pawn_unit)
@@ -94,10 +92,10 @@ describe ChessEngine::Game do
 
     context 'units are blocking moves' do
       it 'returns all moves that are not blocked by units' do
-        blocking_pawn = ChessEngine::Units::Pawn.new('e4', black_player)
-        bishop_unit = ChessEngine::Units::Bishop.new('c6', white_player)
-        rook_unit = ChessEngine::Units::Rook.new('e6', white_player)
-        queen_unit = ChessEngine::Units::Queen.new('g4', white_player)
+        blocking_pawn = ChessEngine::Units::Pawn.new('e4', :black)
+        bishop_unit = ChessEngine::Units::Bishop.new('c6', :white)
+        rook_unit = ChessEngine::Units::Rook.new('e6', :white)
+        queen_unit = ChessEngine::Units::Queen.new('g4', :white)
 
         allow(board_allowed).to receive(:units).and_return([blocking_pawn, bishop_unit, rook_unit, queen_unit])
 
@@ -114,11 +112,11 @@ describe ChessEngine::Game do
 
     context 'unblocked enemies in move range' do
       it 'allows attack' do
-        queen = ChessEngine::Units::Queen.new('f6', black_player)
-        enemy_queen = ChessEngine::Units::Queen.new('f1', white_player)
-        enemy_knight = ChessEngine::Units::Knight.new('d5', white_player)
-        enemy_pawn = ChessEngine::Units::Pawn.new('d4', white_player)
-        enemy_bishop = ChessEngine::Units::Bishop.new('f8', white_player)
+        queen = ChessEngine::Units::Queen.new('f6', :black)
+        enemy_queen = ChessEngine::Units::Queen.new('f1', :white)
+        enemy_knight = ChessEngine::Units::Knight.new('d5', :white)
+        enemy_pawn = ChessEngine::Units::Pawn.new('d4', :white)
+        enemy_bishop = ChessEngine::Units::Bishop.new('f8', :white)
 
         allow(board_allowed).to receive(:units).and_return([queen, enemy_queen, enemy_knight, enemy_pawn, enemy_bishop])
 
@@ -132,10 +130,10 @@ describe ChessEngine::Game do
 
     context 'blocked enemies in move range' do
       it 'do not allow attack' do
-        white_rook = ChessEngine::Units::Rook.new('a1', white_player)
-        white_pawn = ChessEngine::Units::Pawn.new('a2', white_player)
-        black_rook = ChessEngine::Units::Rook.new('a6', black_player)
-        black_bishop = ChessEngine::Units::Bishop.new('c1', black_player)
+        white_rook = ChessEngine::Units::Rook.new('a1', :white)
+        white_pawn = ChessEngine::Units::Pawn.new('a2', :white)
+        black_rook = ChessEngine::Units::Rook.new('a6', :black)
+        black_bishop = ChessEngine::Units::Bishop.new('c1', :black)
 
         allow(board_allowed).to receive(:units).and_return([white_rook, white_pawn, black_rook, black_bishop])
 
@@ -148,7 +146,7 @@ describe ChessEngine::Game do
     end
 
     context 'enemy pawn just moved two spaces' do
-      let(:enemy_pawn_jumped_two) { ChessEngine::Units::Pawn.new('d4', white_player) }
+      let(:enemy_pawn_jumped_two) { ChessEngine::Units::Pawn.new('d4', :white) }
 
       before do
         allow(game_allowed).to receive(:last_action).and_return(double('action',
@@ -158,14 +156,14 @@ describe ChessEngine::Game do
       end
 
       it 'adjacent pawn can en passant' do
-        adjacent_pawn = ChessEngine::Units::Pawn.new('e4', black_player)
+        adjacent_pawn = ChessEngine::Units::Pawn.new('e4', :black)
         board_allowed.add_unit(enemy_pawn_jumped_two, adjacent_pawn)
         adjacent_pawn_result = game_allowed.unit_allowed_actions(adjacent_pawn)
         expect(adjacent_pawn_result).to match_locations(['d3'], ChessEngine::Actions::EnPassantCommand)
       end
 
       it 'non-adjacent pawn cannot en passant' do
-        non_adjacent_pawn = ChessEngine::Units::Pawn.new('f4', black_player)
+        non_adjacent_pawn = ChessEngine::Units::Pawn.new('f4', :black)
         board_allowed.add_unit(enemy_pawn_jumped_two, non_adjacent_pawn)
         non_adjacent_pawn_result = game_allowed.unit_allowed_actions(non_adjacent_pawn)
         en_passant_move_result = non_adjacent_pawn_result.detect do |action|
@@ -176,7 +174,7 @@ describe ChessEngine::Game do
     end
 
     context 'pawn has not moved' do
-      let(:new_pawn) { ChessEngine::Units::Pawn.new('h7', black_player) }
+      let(:new_pawn) { ChessEngine::Units::Pawn.new('h7', :black) }
       let(:log_double) { double('game_log', last_action: nil) }
 
       before do
@@ -191,7 +189,7 @@ describe ChessEngine::Game do
     end
 
     context 'pawn has moved' do
-      let(:moved_pawn) { ChessEngine::Units::Pawn.new('h6', black_player) }
+      let(:moved_pawn) { ChessEngine::Units::Pawn.new('h6', :black) }
 
       before do
         allow(blank_board).to receive(:units).and_return([moved_pawn])
@@ -207,9 +205,9 @@ describe ChessEngine::Game do
     end
 
     context 'pawn has not moved, but is blocked by another unit' do
-      let(:new_pawn) { ChessEngine::Units::Pawn.new('h7', black_player) }
-      let(:blocking_friendly) { ChessEngine::Units::Knight.new('h6', black_player) }
-      let(:enemy_on_space) { ChessEngine::Units::Rook.new('h5', white_player) }
+      let(:new_pawn) { ChessEngine::Units::Pawn.new('h7', :black) }
+      let(:blocking_friendly) { ChessEngine::Units::Knight.new('h6', :black) }
+      let(:enemy_on_space) { ChessEngine::Units::Rook.new('h5', :white) }
 
       it 'not allowed to double move' do
         allow(board_allowed).to receive(:units).and_return([new_pawn, blocking_friendly])
@@ -220,12 +218,12 @@ describe ChessEngine::Game do
     end
 
     context 'king and rook have not moved and no units blocking path' do
-      let(:white_queenside_rook) { ChessEngine::Units::Rook.new('a1', white_player) }
-      let(:black_queenside_rook) { ChessEngine::Units::Rook.new('a8', black_player) }
-      let(:white_kingside_rook) { ChessEngine::Units::Rook.new('h1', white_player) }
-      let(:black_kingside_rook) { ChessEngine::Units::Rook.new('h8', black_player) }
-      let(:white_king) { ChessEngine::Units::King.new('e1', white_player) }
-      let(:black_king) { ChessEngine::Units::King.new('e8', black_player) }
+      let(:white_queenside_rook) { ChessEngine::Units::Rook.new('a1', :white) }
+      let(:black_queenside_rook) { ChessEngine::Units::Rook.new('a8', :black) }
+      let(:white_kingside_rook) { ChessEngine::Units::Rook.new('h1', :white) }
+      let(:black_kingside_rook) { ChessEngine::Units::Rook.new('h8', :black) }
+      let(:white_king) { ChessEngine::Units::King.new('e1', :white) }
+      let(:black_king) { ChessEngine::Units::King.new('e8', :black) }
 
       before do
         allow(game_allowed).to receive(:unit_actions)
@@ -247,11 +245,11 @@ describe ChessEngine::Game do
     end
 
     context 'king and rook have not moved but units blocking path' do
-      let(:black_queenside_rook) { ChessEngine::Units::Rook.new('a8', black_player) }
-      let(:black_kingside_rook) { ChessEngine::Units::Rook.new('h8', black_player) }
-      let(:black_king) { ChessEngine::Units::King.new('e8', black_player) }
-      let(:white_bishop) { ChessEngine::Units::Bishop.new('g8', white_player) }
-      let(:black_queen) { ChessEngine::Units::Queen.new('d8', white_player) }
+      let(:black_queenside_rook) { ChessEngine::Units::Rook.new('a8', :black) }
+      let(:black_kingside_rook) { ChessEngine::Units::Rook.new('h8', :black) }
+      let(:black_king) { ChessEngine::Units::King.new('e8', :black) }
+      let(:white_bishop) { ChessEngine::Units::Bishop.new('g8', :white) }
+      let(:black_queen) { ChessEngine::Units::Queen.new('d8', :white) }
 
       before do
         board_allowed.add_unit(black_queenside_rook, black_kingside_rook, black_king,
@@ -271,11 +269,11 @@ describe ChessEngine::Game do
     end
 
     context 'king and rook have not moved but king move spaces are under attack' do
-      let(:white_queenside_rook) { ChessEngine::Units::Rook.new('a1', white_player) }
-      let(:white_kingside_rook) { ChessEngine::Units::Rook.new('h1', white_player) }
-      let(:white_king) { ChessEngine::Units::King.new('e1', white_player) }
-      let(:black_rook) { ChessEngine::Units::Rook.new('f8', black_player) }
-      let(:black_knight) { ChessEngine::Units::Knight.new('e3', black_player) }
+      let(:white_queenside_rook) { ChessEngine::Units::Rook.new('a1', :white) }
+      let(:white_kingside_rook) { ChessEngine::Units::Rook.new('h1', :white) }
+      let(:white_king) { ChessEngine::Units::King.new('e1', :white) }
+      let(:black_rook) { ChessEngine::Units::Rook.new('f8', :black) }
+      let(:black_knight) { ChessEngine::Units::Knight.new('e3', :black) }
 
       before do
         board_allowed.add_unit(white_queenside_rook, white_kingside_rook, white_king,
@@ -295,9 +293,9 @@ describe ChessEngine::Game do
     end
 
     context 'king or rook have moved' do
-      let(:queenside_rook) { ChessEngine::Units::Rook.new('a1', white_player) }
-      let(:kingside_rook) { ChessEngine::Units::Rook.new('h1', white_player) }
-      let(:king) { ChessEngine::Units::King.new('e1', white_player) }
+      let(:queenside_rook) { ChessEngine::Units::Rook.new('a1', :white) }
+      let(:kingside_rook) { ChessEngine::Units::Rook.new('h1', :white) }
+      let(:king) { ChessEngine::Units::King.new('e1', :white) }
 
       before do
         board_allowed.add_unit(queenside_rook, kingside_rook, king)
@@ -320,15 +318,15 @@ describe ChessEngine::Game do
   describe '#stalemate?' do
     subject(:game_stalemate) { blank_game }
     let(:board_stalemate) { ChessEngine::Board.new }
-    let(:black_king) { ChessEngine::Units::King.new('a8', black_player) }
-    let(:black_queen) { ChessEngine::Units::Queen.new('g8', black_player) }
-    let(:black_rook1) { ChessEngine::Units::Rook.new('h8', black_player) }
-    let(:black_pawn) { ChessEngine::Units::Pawn.new('a5', black_player) }
-    let(:black_rook2) { ChessEngine::Units::Rook.new('a2', black_player) }
-    let(:white_pawn1) { ChessEngine::Units::Pawn.new('a4', white_player) }
-    let(:white_pawn2) { ChessEngine::Units::Pawn.new('c5', white_player) }
-    let(:white_bishop) { ChessEngine::Units::Bishop.new('h6', white_player) }
-    let(:white_king) { ChessEngine::Units::King.new('h1', white_player) }
+    let(:black_king) { ChessEngine::Units::King.new('a8', :black) }
+    let(:black_queen) { ChessEngine::Units::Queen.new('g8', :black) }
+    let(:black_rook1) { ChessEngine::Units::Rook.new('h8', :black) }
+    let(:black_pawn) { ChessEngine::Units::Pawn.new('a5', :black) }
+    let(:black_rook2) { ChessEngine::Units::Rook.new('a2', :black) }
+    let(:white_pawn1) { ChessEngine::Units::Pawn.new('a4', :white) }
+    let(:white_pawn2) { ChessEngine::Units::Pawn.new('c5', :white) }
+    let(:white_bishop) { ChessEngine::Units::Bishop.new('h6', :white) }
+    let(:white_king) { ChessEngine::Units::King.new('h1', :white) }
 
     before do
       allow(game_stalemate).to receive(:board).and_return(board_stalemate)
@@ -347,7 +345,7 @@ describe ChessEngine::Game do
 
     context 'king is not in check, but any move will put it in check' do
       it 'returns true' do
-        black_knight = ChessEngine::Units::Knight.new('c6', black_player)
+        black_knight = ChessEngine::Units::Knight.new('c6', :black)
         game_stalemate.board.add_unit(black_knight)
         expect(game_stalemate).to be_stalemate(white_king)
       end
@@ -355,7 +353,7 @@ describe ChessEngine::Game do
   end
 
   describe '#check?' do
-    let(:king) { ChessEngine::Units::King.new('b2', white_player) }
+    let(:king) { ChessEngine::Units::King.new('b2', :white) }
     let(:board_check) { ChessEngine::Board.new }
     subject(:game_check) { blank_game }
 
@@ -365,7 +363,7 @@ describe ChessEngine::Game do
 
     context 'king unit is in check' do
       it 'returns true' do
-        enemy_bishop = ChessEngine::Units::Bishop.new('f6', black_player)
+        enemy_bishop = ChessEngine::Units::Bishop.new('f6', :black)
         allow(board_check).to receive(:units).and_return([king, enemy_bishop])
         expect(game_check).to be_check(king)
       end
@@ -373,7 +371,7 @@ describe ChessEngine::Game do
 
     context 'king unit is not in check' do
       it 'returns false' do
-        enemy_bishop = ChessEngine::Units::Bishop.new('e6', black_player)
+        enemy_bishop = ChessEngine::Units::Bishop.new('e6', :black)
         allow(board_check).to receive(:units).and_return([king, enemy_bishop])
         expect(game_check).not_to be_check(king)
       end
@@ -381,9 +379,9 @@ describe ChessEngine::Game do
   end
 
   describe '#checkmate?' do
-    let(:white_king) { ChessEngine::Units::King.new('h1', white_player) }
-    let(:black_rook) { ChessEngine::Units::Rook.new('g5', black_player) }
-    let(:black_knight) { ChessEngine::Units::Knight.new('f2', black_player) }
+    let(:white_king) { ChessEngine::Units::King.new('h1', :white) }
+    let(:black_rook) { ChessEngine::Units::Rook.new('g5', :black) }
+    let(:black_knight) { ChessEngine::Units::Knight.new('f2', :black) }
     let(:board_checkmate) { ChessEngine::Board.new }
     subject(:game_checkmate) { blank_game }
 
@@ -394,7 +392,7 @@ describe ChessEngine::Game do
 
     context 'king is in check but still has possible moves' do
       it 'returns false' do
-        black_bishop = ChessEngine::Units::Bishop.new('c8', black_player)
+        black_bishop = ChessEngine::Units::Bishop.new('c8', :black)
         board_checkmate.add_unit(black_bishop)
         expect(game_checkmate).not_to be_checkmate(white_king)
       end
@@ -402,7 +400,7 @@ describe ChessEngine::Game do
 
     context 'king is in check and has no possible moves' do
       it 'returns true' do
-        black_bishop = ChessEngine::Units::Bishop.new('b8', black_player)
+        black_bishop = ChessEngine::Units::Bishop.new('b8', :black)
         board_checkmate.add_unit(black_bishop)
         expect(game_checkmate).to be_checkmate(white_king)
       end
@@ -415,7 +413,7 @@ describe ChessEngine::Game do
 
     context 'pawn is on last space' do
       it 'returns true' do
-        promotable_pawn = ChessEngine::Units::Pawn.new('b1', black_player)
+        promotable_pawn = ChessEngine::Units::Pawn.new('b1', :black)
         allow(game_can_promote).to receive(:last_unit).and_return(promotable_pawn)
         allow(board_can_promote).to receive(:delta_location).with('b1', [-1, 0]).and_return(nil)
         allow(game_can_promote).to receive(:board).and_return(board_can_promote)
@@ -425,7 +423,7 @@ describe ChessEngine::Game do
 
     context 'pawn is not on last space' do
       it 'returns false' do
-        promotable_pawn = ChessEngine::Units::Pawn.new('b2', black_player)
+        promotable_pawn = ChessEngine::Units::Pawn.new('b2', :black)
         allow(board_can_promote).to receive(:delta_location).with('b2', [-1, 0]).and_return('b1')
         allow(game_can_promote).to receive(:board).and_return(board_can_promote)
         expect(game_can_promote).not_to be_can_promote_last_unit
@@ -434,10 +432,10 @@ describe ChessEngine::Game do
   end
 
   describe '#perform_action' do
-    subject(:game_perform) { described_class.new([white_player, black_player]) }
+    subject(:game_perform) { described_class.new }
 
     context 'game has not started' do
-      let(:action) { double('action', unit: double('unit', player: white_player)) }
+      let(:action) { double('action', unit: double('unit', color: :white)) }
 
       before do
         game_perform.instance_variable_set(:@status, :initialized)
@@ -451,7 +449,7 @@ describe ChessEngine::Game do
 
     context 'game is already over' do
       let(:action) do
-        double('action', unit: double('unit', player: white_player))
+        double('action', unit: double('unit', color: :white))
       end
 
       before do
@@ -466,7 +464,7 @@ describe ChessEngine::Game do
     end
 
     context 'action is not currently allowed for the unit' do
-      let(:unit) { double('unit', player: white_player, location: 'b6', symbol: '♘') }
+      let(:unit) { double('unit', color: :white, location: 'b6', symbol: '♘') }
       let(:move) { double('move', unit:, location: 'h3') }
       let(:other_move) { double('move', unit:, location: 'h4') }
       let(:action) { double('action', moves: [move]) }
@@ -484,7 +482,7 @@ describe ChessEngine::Game do
     end
 
     context 'action is allowed for the unit' do
-      let(:unit) { double('unit', player: white_player, location: 'b6', symbol: '♘') }
+      let(:unit) { double('unit', color: :white, location: 'b6', symbol: '♘') }
       let(:action) { double('action', moves: [double('move', unit:, location: 'h3')]) }
 
       before do
@@ -493,7 +491,7 @@ describe ChessEngine::Game do
         game_perform.instance_variable_set(:@status, :playing)
         allow(game_perform).to receive(:unit_allowed_actions).and_return([action])
         game_perform.instance_variable_set(:@turn, 10)
-        game_perform.instance_variable_set(:@current_player, white_player)
+        game_perform.instance_variable_set(:@current_player, :white)
       end
 
       it 'sends perform_action to action and switches the player' do
@@ -514,7 +512,7 @@ describe ChessEngine::Game do
       context 'unit cannot be promoted and not end of game' do
         it 'switches players' do
           allow(game_perform).to receive(:can_promote_last_unit?).and_return(false)
-          expect { game_perform.perform_action(action) }.to change { game_perform.current_player }.to(black_player)
+          expect { game_perform.perform_action(action) }.to change { game_perform.current_player }.to(:black)
         end
       end
 
@@ -543,9 +541,9 @@ describe ChessEngine::Game do
   end
 
   describe '#select_actionable_unit' do
-    subject(:game_select) { described_class.new([white_player, black_player]) }
+    subject(:game_select) { described_class.new }
     let(:board_select) { ChessEngine::Board.new }
-    let(:h7_pawn) { ChessEngine::Units::Pawn.new('h7', black_player) }
+    let(:h7_pawn) { ChessEngine::Units::Pawn.new('h7', :black) }
 
     before do
       board_select.add_unit(h7_pawn)
@@ -554,7 +552,7 @@ describe ChessEngine::Game do
 
     context 'unit is at location for current player' do
       before do
-        allow(game_select).to receive(:current_player).and_return(black_player)
+        allow(game_select).to receive(:current_player).and_return(:black)
       end
 
       it 'unit at location is selected' do
@@ -566,7 +564,7 @@ describe ChessEngine::Game do
 
     context 'unit is at location but not for current player' do
       before do
-        allow(game_select).to receive(:current_player).and_return(white_player)
+        allow(game_select).to receive(:current_player).and_return(:white)
       end
 
       it 'unit at location is not selected' do
@@ -578,7 +576,7 @@ describe ChessEngine::Game do
 
     context 'unit is not at location' do
       before do
-        allow(game_select).to receive(:current_player).and_return(black_player)
+        allow(game_select).to receive(:current_player).and_return(:black)
       end
 
       it 'no unit is selected' do

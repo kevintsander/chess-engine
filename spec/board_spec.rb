@@ -3,9 +3,6 @@
 require_relative '../lib/chess-engine/board'
 
 describe ChessEngine::Board do
-  let(:white_player) { double('white_player', color: :white) }
-  let(:black_player) { double('black_player', color: :black) }
-
   describe '#unit_at' do
     subject(:board) { described_class.new }
     let(:unit) { double('unit', location: 'g3') }
@@ -33,9 +30,9 @@ describe ChessEngine::Board do
     subject(:board_block) { described_class.new }
 
     context 'horizontal move with no other units between' do
-      let(:move_unit) { double('unit', location: 'g2', player: white_player) }
-      let(:friendly_unit) { double('unit', location: 'c3', player: white_player) }
-      let(:unfriendly_unit) { double('unit', location: 'a1', player: black_player) }
+      let(:move_unit) { double('unit', location: 'g2', color: :white) }
+      let(:friendly_unit) { double('unit', location: 'c3', color: :white) }
+      let(:unfriendly_unit) { double('unit', location: 'a1', color: :white) }
 
       before do
         board_block.add_unit(move_unit, friendly_unit, unfriendly_unit)
@@ -47,9 +44,9 @@ describe ChessEngine::Board do
     end
 
     context 'horizontal move with defenders or friendly units between' do
-      let(:move_unit) { double('unit', location: 'g2', player: white_player) }
-      let(:friendly_unit) { double('unit', location: 'g4', player: white_player) }
-      let(:unfriendly_unit) { double('unit', location: 'g3', player: black_player) }
+      let(:move_unit) { double('unit', location: 'g2', color: :white) }
+      let(:friendly_unit) { double('unit', location: 'g4', color: :white) }
+      let(:unfriendly_unit) { double('unit', location: 'g3', color: :black) }
 
       it 'returns true' do
         # check unfriendly
@@ -61,9 +58,9 @@ describe ChessEngine::Board do
       end
     end
     context 'diagonal move with no units between' do
-      let(:move_unit) { double('unit', location: 'b2', player: white_player) }
-      let(:friendly_unit) { double('unit', location: 'd5', player: white_player) }
-      let(:unfriendly_unit) { double('unit', location: 'e8', player: black_player) }
+      let(:move_unit) { double('unit', location: 'b2', color: :white) }
+      let(:friendly_unit) { double('unit', location: 'd5', color: :white) }
+      let(:unfriendly_unit) { double('unit', location: 'e8', color: :black) }
 
       it 'returns false' do
         board_block.add_unit(move_unit, friendly_unit, unfriendly_unit)
@@ -72,9 +69,9 @@ describe ChessEngine::Board do
     end
 
     context 'diagonal move with defenders or friendly units between' do
-      let(:move_unit) { double('unit', location: 'b2', player: white_player) }
-      let(:friendly_unit) { double('unit', location: 'd4', player: white_player) }
-      let(:unfriendly_unit) { double('unit', location: 'f6', player: black_player) }
+      let(:move_unit) { double('unit', location: 'b2', color: :white) }
+      let(:friendly_unit) { double('unit', location: 'd4', color: :white) }
+      let(:unfriendly_unit) { double('unit', location: 'f6', color: :black) }
 
       it 'returns true' do
         # check unfriendly
@@ -105,9 +102,8 @@ describe ChessEngine::Board do
     subject(:file_board) { described_class.new }
 
     context 'unit(s) of specified color and type are located at file' do
-      let(:player) { double('player', color: :black) }
-      let(:file_unit1) { double('unit', location: 'c8', off_board?: false, player:) }
-      let(:file_unit2) { double('unit', location: 'c2', off_board?: false, player:) }
+      let(:file_unit1) { double('unit', location: 'c8', off_board?: false, color: :black) }
+      let(:file_unit2) { double('unit', location: 'c2', off_board?: false, color: :black) }
 
       before do
         allow(file_unit1).to receive(:instance_of?).and_return(true)
@@ -122,9 +118,8 @@ describe ChessEngine::Board do
     end
 
     context 'no unit at file' do
-      let(:player) { double('player', color: :black) }
-      let(:file_unit1) { double('unit', location: 'c8', off_board?: false, player:) }
-      let(:file_unit2) { double('unit', location: 'c2', off_board?: false, player:) }
+      let(:file_unit1) { double('unit', location: 'c8', off_board?: false, color: :black) }
+      let(:file_unit2) { double('unit', location: 'c2', off_board?: false, color: :black) }
 
       before do
         allow(file_board).to receive(:units).and_return([file_unit1, file_unit2])
@@ -137,9 +132,8 @@ describe ChessEngine::Board do
     end
 
     context 'unit of same color but different type on file' do
-      let(:player) { double('player', color: :white) }
-      let(:file_unit1) { double('unit', location: 'h8', off_board?: false, player:) }
-      let(:file_unit2) { double('unit', location: 'h3', off_board?: false, player:) }
+      let(:file_unit1) { double('unit', location: 'h8', off_board?: false, color: :white) }
+      let(:file_unit2) { double('unit', location: 'h3', off_board?: false, color: :white) }
 
       before do
         allow(file_unit1).to receive(:instance_of?).and_return(false)
@@ -154,8 +148,7 @@ describe ChessEngine::Board do
     end
 
     context 'unit of same type but different color on file' do
-      let(:player1) { double('player1', color: :white) }
-      let(:file_unit1) { double('unit', location: 'h8', off_board?: false, player: player1) }
+      let(:file_unit1) { double('unit', location: 'h8', off_board?: false, color: :white) }
 
       before do
         allow(file_board).to receive(:units).and_return([file_unit1])
@@ -173,9 +166,8 @@ describe ChessEngine::Board do
     subject(:rank_board) { described_class.new }
 
     context 'unit(s) of specified color and type are loated at rank' do
-      let(:player) { double('player', color: :black) }
-      let(:rank_unit1) { double('unit', location: 'e2', off_board?: false, player:) }
-      let(:rank_unit2) { double('unit', location: 'c2', off_board?: false, player:) }
+      let(:rank_unit1) { double('unit', location: 'e2', off_board?: false, color: :black) }
+      let(:rank_unit2) { double('unit', location: 'c2', off_board?: false, color: :black) }
 
       before do
         allow(rank_unit1).to receive(:instance_of?).and_return(true)
@@ -190,9 +182,8 @@ describe ChessEngine::Board do
     end
 
     context 'no unit at rank' do
-      let(:player) { double('player', color: :black) }
-      let(:rank_unit1) { double('unit', location: 'e2', off_board?: false, player:) }
-      let(:rank_unit2) { double('unit', location: 'c2', off_board?: false, player:) }
+      let(:rank_unit1) { double('unit', location: 'e2', off_board?: false, color: :black) }
+      let(:rank_unit2) { double('unit', location: 'c2', off_board?: false, color: :black) }
 
       before do
         allow(rank_board).to receive(:units).and_return([rank_unit1, rank_unit2])
@@ -205,9 +196,8 @@ describe ChessEngine::Board do
     end
 
     context 'unit of same color but different type on rank' do
-      let(:player) { double('player', color: :white) }
-      let(:rank_unit1) { double('unit', location: 'b3', off_board?: false, player:) }
-      let(:rank_unit2) { double('unit', location: 'h3', off_board?: false, player:) }
+      let(:rank_unit1) { double('unit', location: 'b3', off_board?: false, color: :white) }
+      let(:rank_unit2) { double('unit', location: 'h3', off_board?: false, color: :white) }
 
       before do
         allow(rank_unit1).to receive(:instance_of?).and_return(false)
@@ -222,8 +212,7 @@ describe ChessEngine::Board do
     end
 
     context 'unit of same type but different color on rank' do
-      let(:player) { double('player', color: :white) }
-      let(:rank_unit1) { double('unit', location: 'h8', off_board?: false, player:) }
+      let(:rank_unit1) { double('unit', location: 'h8', off_board?: false, color: :white) }
 
       before do
         allow(rank_board).to receive(:units).and_return([rank_unit1])

@@ -15,14 +15,13 @@ module ChessEngine
     include Helpers::Game::GameActionChecker
     include Helpers::Game::GameStatusChecker
 
-    attr_reader :board, :game_log, :players, :turn, :current_player, :allowed_actions, :promote_location, :status
+    attr_reader :board, :game_log, :turn, :current_player, :allowed_actions, :promote_location, :status
 
     @current_player = nil
     @turn = 0
     @player_draw = false
 
-    def initialize(players = [])
-      @players = players
+    def initialize
       @game_log = []
       @board = Board.new
       @allowed_actions = {}
@@ -30,14 +29,10 @@ module ChessEngine
       @status = :initialized
     end
 
-    def add_players(players)
-      @players = players
-    end
-
     def start
       setup_new_board
       @turn = 1
-      @current_player = @players.detect { |player| player.color == :white }
+      @current_player = :white
       @status = :playing
       set_allowed_actions
     end
@@ -50,8 +45,8 @@ module ChessEngine
 
     def both_players_played?
       turn_logs = game_log.select { |log_item| log_item[:turn] == turn }
-      player1_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.player == players[0] }&.any?
-      player2_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.player == players[1] }&.any?
+      player1_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.color == :white }&.any?
+      player2_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.color == :white }&.any?
       player1_played && player2_played
     end
 
@@ -132,7 +127,7 @@ module ChessEngine
       @allowed_actions = {}
       return unless %i[playing check].include?(status)
 
-      board.units.select { |u| u.player == current_player }.select(&:location).each do |unit|
+      board.units.select { |u| u.color == current_player }.select(&:location).each do |unit|
         @allowed_actions[unit.location] = unit_allowed_actions(unit)
       end
     end
@@ -146,15 +141,15 @@ module ChessEngine
 
     def new_game_units
       units = []
-      players.each do |player|
-        non_pawn_rank = player.color == :white ? '1' : '8'
-        pawn_rank = player.color == :white ? '2' : '7'
-        units << Units::King.new("e#{non_pawn_rank}", player)
-        units << Units::Queen.new("d#{non_pawn_rank}", player)
-        units += %w[c f].map { |file| Units::Bishop.new("#{file}#{non_pawn_rank}", player) }
-        units += %w[b g].map { |file| Units::Knight.new("#{file}#{non_pawn_rank}", player) }
-        units += %w[a h].map { |file| Units::Rook.new("#{file}#{non_pawn_rank}", player) }
-        units += %w[a b c d e f g h].map { |file| Units::Pawn.new("#{file}#{pawn_rank}", player) }
+      %i[white black].each do |color|
+        non_pawn_rank = color == :white ? '1' : '8'
+        pawn_rank = color == :white ? '2' : '7'
+        units << Units::King.new("e#{non_pawn_rank}", color)
+        units << Units::Queen.new("d#{non_pawn_rank}", color)
+        units += %w[c f].map { |file| Units::Bishop.new("#{file}#{non_pawn_rank}", color) }
+        units += %w[b g].map { |file| Units::Knight.new("#{file}#{non_pawn_rank}", color) }
+        units += %w[a h].map { |file| Units::Rook.new("#{file}#{non_pawn_rank}", color) }
+        units += %w[a b c d e f g h].map { |file| Units::Pawn.new("#{file}#{pawn_rank}", color) }
       end
       units
     end
@@ -163,13 +158,9 @@ module ChessEngine
       @board.clear_units.add_unit(*new_game_units)
     end
 
-    def other_player(player)
-      (players - [player]).first
-    end
-
     def select_actionable_unit(location)
       unit_at_location = board.unit_at(location)
-      if unit_at_location&.player == current_player && units_with_actions(current_player).include?(unit_at_location)
+      if unit_at_location&.color == current_player && units_with_actions(current_player).include?(unit_at_location)
         unit = unit_at_location
       end
       unit
@@ -186,7 +177,7 @@ module ChessEngine
     private
 
     def switch_current_player
-      @current_player = other_player(current_player)
+      @current_player == :white ? :black : :white
     end
   end
 end

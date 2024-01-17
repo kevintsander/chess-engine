@@ -5,8 +5,7 @@ require_relative '../../lib/chess-engine/units/rook'
 describe ChessEngine::Units::Rook do
   describe '#initialize' do
     context 'player color is black' do
-      let(:black_player) { double('player', name: 'player1', color: :black) }
-      subject(:black_rook) { described_class.new('a8', black_player) }
+      subject(:black_rook) { described_class.new('a8', :black) }
 
       it 'sets symbol to black rook' do
         expect(black_rook.symbol).to eq('♜')
@@ -14,8 +13,7 @@ describe ChessEngine::Units::Rook do
     end
 
     context 'player color is white' do
-      let(:white_player) { double('player', name: 'player1', color: :white) }
-      subject(:white_rook) { described_class.new('a1', white_player) }
+      subject(:white_rook) { described_class.new('a1', :white) }
 
       it 'sets symbol to white rook' do
         expect(white_rook.symbol).to eq('♖')
