@@ -15,9 +15,9 @@ module ChessEngine
     include Helpers::Game::GameActionChecker
     include Helpers::Game::GameStatusChecker
 
-    attr_reader :board, :game_log, :turn, :current_player, :allowed_actions, :promote_location, :status
+    attr_reader :board, :game_log, :turn, :current_color, :allowed_actions, :promote_location, :status
 
-    @current_player = nil
+    @current_color = nil
     @turn = 0
     @player_draw = false
 
@@ -32,7 +32,7 @@ module ChessEngine
     def start
       setup_new_board
       @turn = 1
-      @current_player = :white
+      @current_color = :white
       @status = :playing
       set_allowed_actions
     end
@@ -45,9 +45,9 @@ module ChessEngine
 
     def both_players_played?
       turn_logs = game_log.select { |log_item| log_item[:turn] == turn }
-      player1_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.color == :white }&.any?
-      player2_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.color == :white }&.any?
-      player1_played && player2_played
+      white_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.color == :white }&.any?
+      black_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.color == :white }&.any?
+      white_played && black_played
     end
 
     def perform_action(action)
@@ -63,6 +63,7 @@ module ChessEngine
                 "unit #{unit.symbol} cannot perform #{action.class.name}"
         end
 
+        p action
         action.perform_action
         log_action(action)
 
@@ -83,7 +84,7 @@ module ChessEngine
 
         if %i[playing check].include?(@status)
           @turn += 1 if both_players_played?
-          switch_current_player
+          switch_current_color
         end
         set_allowed_actions
         set_promote_location
@@ -109,7 +110,7 @@ module ChessEngine
 
         if %i[playing check].include?(@status)
           @turn += 1 if both_players_played?
-          switch_current_player
+          switch_current_color
         end
         set_allowed_actions
         set_promote_location
@@ -127,7 +128,7 @@ module ChessEngine
       @allowed_actions = {}
       return unless %i[playing check].include?(status)
 
-      board.units.select { |u| u.color == current_player }.select(&:location).each do |unit|
+      board.units.select { |u| u.color == current_color }.select(&:location).each do |unit|
         @allowed_actions[unit.location] = unit_allowed_actions(unit)
       end
     end
@@ -160,7 +161,7 @@ module ChessEngine
 
     def select_actionable_unit(location)
       unit_at_location = board.unit_at(location)
-      if unit_at_location&.color == current_player && units_with_actions(current_player).include?(unit_at_location)
+      if unit_at_location&.color == current_color && units_with_actions(current_color).include?(unit_at_location)
         unit = unit_at_location
       end
       unit
@@ -176,8 +177,8 @@ module ChessEngine
 
     private
 
-    def switch_current_player
-      @current_player == :white ? :black : :white
+    def switch_current_color
+      @current_color = @current_color == :white ? :black : :white
     end
   end
 end

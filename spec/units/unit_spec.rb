@@ -4,7 +4,7 @@ require_relative '../../lib/chess-engine/unit'
 
 describe ChessEngine::Unit do
   describe '#initialize' do
-    context 'white player' do
+    context 'white unit' do
       subject(:unit_new) { described_class.new('g2', :white) }
 
       it 'sets forward to positive' do
@@ -12,7 +12,7 @@ describe ChessEngine::Unit do
       end
     end
 
-    context 'black player' do
+    context 'black unit' do
       subject(:unit_new) { described_class.new('g7', :black) }
 
       it 'sets forward to negative' do
@@ -57,14 +57,14 @@ describe ChessEngine::Unit do
   describe '#enemy?' do
     subject(:friendly_unit) { described_class.new('g5', :white) }
 
-    context 'unit is not owned by same player' do
+    context 'unit is not the same color' do
       subject(:enemy_unit) { described_class.new('g1', :black) }
       it 'returns true' do
         expect(friendly_unit).to be_enemy(enemy_unit)
       end
     end
 
-    context 'unit is owned by same player' do
+    context 'unit is the same color' do
       subject(:friendly_unit_two) { described_class.new('g1', :white) }
       it 'returns false' do
         expect(friendly_unit).not_to be_enemy(friendly_unit_two)

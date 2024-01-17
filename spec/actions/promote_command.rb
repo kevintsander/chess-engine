@@ -4,8 +4,7 @@ require_relative '../../lib/chess-engine/actions/promote_command'
 
 describe ChessEngine::Actions::PromoteCommand do
   let(:board) { double('board') }
-  let(:player) { double('player') }
-  let(:unit) { double('unit', location: 'g8', player:) }
+  let(:unit) { double('unit', location: 'g8', color: :black) }
   subject(:promote) { described_class.new(board, unit, 'g8', Queen) }
 
   before do

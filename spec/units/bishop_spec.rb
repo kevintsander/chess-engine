@@ -4,7 +4,7 @@ require_relative '../../lib/chess-engine/units/bishop'
 
 describe ChessEngine::Units::Bishop do
   describe '#initialize' do
-    context 'player color is black' do
+    context 'color is black' do
       subject(:black_bishop) { described_class.new('c8', :black) }
 
       it 'sets symbol to black bishop' do
@@ -12,7 +12,7 @@ describe ChessEngine::Units::Bishop do
       end
     end
 
-    context 'player color is white' do
+    context 'color is white' do
       subject(:white_bishop) { described_class.new('c1', :white) }
 
       it 'sets symbol to white bishop' do
