@@ -63,7 +63,6 @@ module ChessEngine
                 "unit #{unit.symbol} cannot perform #{action.class.name}"
         end
 
-        p action
         action.perform_action
         log_action(action)
 
@@ -85,6 +84,8 @@ module ChessEngine
         if %i[playing check].include?(@status)
           @turn += 1 if both_colors_played?
           switch_current_color
+        elsif @status != :promoting
+          @current_color = nil
         end
         set_allowed_actions
         set_promote_location
