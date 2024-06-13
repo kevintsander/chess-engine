@@ -43,7 +43,7 @@ module ChessEngine
       @status = :player_draw
     end
 
-    def both_players_played?
+    def both_colors_played?
       turn_logs = game_log.select { |log_item| log_item[:turn] == turn }
       white_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.color == :white }&.any?
       black_played = turn_logs&.select { |log_item| log_item[:action].moves[0].unit.color == :white }&.any?
@@ -68,9 +68,7 @@ module ChessEngine
         log_action(action)
 
         # set next state
-        @status = if any_check?
-                    :check
-                  elsif can_promote_last_unit?
+        @status = if can_promote_last_unit?
                     :promoting
                   elsif fifty_turn_draw?
                     :max_turn_draw
@@ -78,12 +76,14 @@ module ChessEngine
                     :stalemate
                   elsif any_checkmate?
                     :checkmate
+                  elsif any_check?
+                    :check
                   else
                     :playing
                   end
 
         if %i[playing check].include?(@status)
-          @turn += 1 if both_players_played?
+          @turn += 1 if both_colors_played?
           switch_current_color
         end
         set_allowed_actions
@@ -109,7 +109,7 @@ module ChessEngine
                   end
 
         if %i[playing check].include?(@status)
-          @turn += 1 if both_players_played?
+          @turn += 1 if both_colors_played?
           switch_current_color
         end
         set_allowed_actions

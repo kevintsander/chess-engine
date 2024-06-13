@@ -9,7 +9,12 @@ module ChessEngine
         end
 
         def checkmate?(king)
-          king.is_a?(ChessEngine::Units::King) && check?(king) && !friendly_units_have_moves(king) && unit_allowed_actions(king).none?
+          return unless king.is_a?(ChessEngine::Units::King)
+          return unless check?(king)
+          return if friendly_units_have_moves(king)
+          return if unit_allowed_actions(king).any?
+
+          true
         end
 
         def friendly_units_have_moves(unit)

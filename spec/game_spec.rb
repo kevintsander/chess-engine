@@ -491,34 +491,34 @@ describe ChessEngine::Game do
         game_perform.instance_variable_set(:@status, :playing)
         allow(game_perform).to receive(:unit_allowed_actions).and_return([action])
         game_perform.instance_variable_set(:@turn, 10)
-        game_perform.instance_variable_set(:@current_player, :white)
+        game_perform.instance_variable_set(:@current_color, :white)
       end
 
-      it 'sends perform_action to action and switches the player' do
+      it 'sends perform_action to action and switches the color' do
         expect(action).to receive(:perform_action).once
-        expect(game_perform).to receive(:switch_current_player).once
+        expect(game_perform).to receive(:switch_current_color).once
         game_perform.perform_action(action)
       end
 
       context 'unit can be promoted' do
-        it 'does not switch players' do
+        it 'does not switch colors' do
           other_unit = double('other_unit', location: 'a8')
           allow(game_perform).to receive(:last_unit).and_return(other_unit)
           allow(game_perform).to receive(:can_promote_last_unit?).and_return(true)
-          expect { game_perform.perform_action(action) }.not_to(change { game_perform.current_player })
+          expect { game_perform.perform_action(action) }.not_to(change { game_perform.current_color })
         end
       end
 
       context 'unit cannot be promoted and not end of game' do
-        it 'switches players' do
+        it 'switches colors' do
           allow(game_perform).to receive(:can_promote_last_unit?).and_return(false)
-          expect { game_perform.perform_action(action) }.to change { game_perform.current_player }.to(:black)
+          expect { game_perform.perform_action(action) }.to change { game_perform.current_color }.to(:black)
         end
       end
 
       context 'turn is over' do
         before do
-          allow(game_perform).to receive(:both_players_played?).and_return(true)
+          allow(game_perform).to receive(:both_colors_played?).and_return(true)
         end
 
         it 'increments the turn' do
@@ -529,7 +529,7 @@ describe ChessEngine::Game do
 
       context 'turn is not over' do
         before do
-          allow(game_perform).to receive(:both_players_played?).and_return(false)
+          allow(game_perform).to receive(:both_colors_played?).and_return(false)
         end
 
         it 'does not increment the turn' do
@@ -550,9 +550,9 @@ describe ChessEngine::Game do
       allow(game_select).to receive(:board).and_return(board_select)
     end
 
-    context 'unit is at location for current player' do
+    context 'unit is at location for current color' do
       before do
-        allow(game_select).to receive(:current_player).and_return(:black)
+        allow(game_select).to receive(:current_color).and_return(:black)
       end
 
       it 'unit at location is selected' do
@@ -562,9 +562,9 @@ describe ChessEngine::Game do
       end
     end
 
-    context 'unit is at location but not for current player' do
+    context 'unit is at location but not for current color' do
       before do
-        allow(game_select).to receive(:current_player).and_return(:white)
+        allow(game_select).to receive(:current_color).and_return(:white)
       end
 
       it 'unit at location is not selected' do
@@ -576,7 +576,7 @@ describe ChessEngine::Game do
 
     context 'unit is not at location' do
       before do
-        allow(game_select).to receive(:current_player).and_return(:black)
+        allow(game_select).to receive(:current_color).and_return(:black)
       end
 
       it 'no unit is selected' do
