@@ -41,7 +41,7 @@ module ChessEngine
         end
 
         def fifty_turn_draw?
-          turn > 50
+          turn == 50 && both_colors_played?
         end
       end
     end
