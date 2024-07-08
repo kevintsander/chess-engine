@@ -4,7 +4,7 @@ require_relative '../../lib/chess-engine/units/king'
 
 describe ChessEngine::Units::King do
   describe '#initialize' do
-    context 'player color is black' do
+    context 'color is black' do
       subject(:black_king) { described_class.new('e8', :black) }
 
       it 'sets symbol to black king' do
@@ -12,7 +12,7 @@ describe ChessEngine::Units::King do
       end
     end
 
-    context 'player color is white' do
+    context 'color is white' do
       subject(:white_king) { described_class.new('e1', :white) }
 
       it 'sets symbol to white king' do
